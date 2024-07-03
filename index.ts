@@ -1,14 +1,38 @@
-const express = require('express')
+import express, { Express, Request, Response } from "express";
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 
-const app = express()
 
-const post = 3000
+const post: number = 3000
+const app: Express = express()
+const httpServer = createServer(app);
+const io = new Server(httpServer);
 
-app.get('/', (req, res) => {
-    res.json(req)
+
+class Player {
+    position: {
+        x: 0
+        y: 0
+    }
+    color: ''
+
+    constructor(id, x, y, color) {
+        this.position.x = x
+        this.position.y = y
+        this.color = color
+    }
+}
+
+
+app.get('/', (req:Request, res:Response) => {
+    res.send("hello world")
 })
 
-app.listen(post, (err) => {
-    if(err) console.error(err)
+io.on("connection", (socket) => {
+    // ...
+  });
+
+
+httpServer.listen(post, () => {
     console.log(`server running in post ${post}`)
 })
