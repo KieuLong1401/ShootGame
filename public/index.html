@@ -1,14 +1,25 @@
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="index.js" type="text/javascript"></script>
-</head>
-<body onload="getCanvas();">
-    <canvas id="canvas" width="1000", height="1000"></canvas>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+        />
+        <title>Document</title>
+        <script src="/socket.io/socket.io.js"></script>
+    </head>
+    <body>
+        <button onclick="join();">join</button>
+        <canvas
+            id="canvas"
+            width="700"
+            ,
+            height="700"
+        ></canvas>
+        <script
+            src="index.js"
+            type="text/javascript"
+        ></script>
+    </body>
 </html>
