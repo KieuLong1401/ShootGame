@@ -27,7 +27,7 @@ function sendPlayers() {
 }
 function updatePlayer(id, value) {
     if(value == null) {
-        delete players[id] 
+        delete players[id]
     } else {
         players[id] = value
     }
@@ -42,20 +42,25 @@ app.get('/', (req, res) => {
 })
 
 io.on('connection', (socket) => {
+    const id = socket.id
+
     sendPlayers()
     socket.on('disconnect', (reason) => {
-        if (players[socket.id]) {
-            colors.push(players[socket.id].color)
-            updatePlayer(socket.id, null)
+        if (players[id]) {
+            colors.push(players[id].color)
+            updatePlayer(id, null)
         }
     })
-    socket.on('addPlayer', (player) => {
-        updatePlayer(socket.id, {
+    socket.on('addPlayer', (name) => {
+        updatePlayer(id, {
             position: getRandomPosition(),
             color: getRandomColor(),
             point: 0,
-            ...player,
+            name,
         })
+    })
+    socket.on('updatePlayer', (player) => {
+        updatePlayer(id, player)
     })
 })
 

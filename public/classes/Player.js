@@ -14,13 +14,13 @@ class Player {
         this.renderName(ctx)
     }
     renderBody(ctx) {
-        this.playerSize = (40 + this.point) * window.devicePixelRatio
+        this.size = (40 + this.point) * window.devicePixelRatio
 
         ctx.beginPath()
         ctx.arc(
             this.position.x,
             this.position.y,
-            this.playerSize,
+            this.size,
             0,
             2 * Math.PI
         )
@@ -35,25 +35,7 @@ class Player {
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
 
-        ctx.fillText(this.name, this.position.x, this.position.y + this.playerSize + spaceFromBodyToName)
-    }
-    move(moves) {
-        moves.forEach(e => {
-            switch(e) {
-                case '':
-                    this.position. += 5
-                    break
-                case '':
-                    this.position. += 5
-                    break
-                case '':
-                    this.position. += 5
-                    break
-                case '':
-                    this.position. += 5
-                    break
-            }
-        })
+        ctx.fillText(this.name, this.position.x, this.position.y + this.size + spaceFromBodyToName)
     }
 }
 
