@@ -7,8 +7,9 @@ const app = express()
 const httpServer = createServer(app)
 const io = new Server(httpServer, { pingInterval: 2000, pingTimeout: 4000 })
 
-const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']
+const colors = ['#39FF14', '#FF6EC7', '#00FFFF', '#FFFF00', '#FFA500']
 var players = {}
+
 
 function getRandomColor() {
     const randomIndex = Math.floor(Math.random() * colors.length)
@@ -21,35 +22,44 @@ function getRandomPosition() {
         y: Math.floor(500 * Math.random() + 40),
     }
 }
-function update() {
+function sendPlayers() {
     io.emit('updatePlayers', players)
 }
+function updatePlayer(id, value) {
+    if(value == null) {
+        delete players[id] 
+    } else {
+        players[id] = value
+    }
+
+    sendPlayers()
+}
+
 
 app.use(express.static('public'))
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + 'public/index.html')
+    res.sendFile(__dirname + '/public/client.html')
 })
 
 io.on('connection', (socket) => {
-    update()
+    sendPlayers()
     socket.on('disconnect', (reason) => {
-        console.log(reason)
         if (players[socket.id]) {
             colors.push(players[socket.id].color)
-            delete players[socket.id]
+            updatePlayer(socket.id, null)
         }
-        update()
     })
     socket.on('addPlayer', (player) => {
-        players[socket.id] = {
+        updatePlayer(socket.id, {
             position: getRandomPosition(),
             color: getRandomColor(),
             point: 0,
             ...player,
-        }
-        update()
+        })
     })
 })
+
+
 
 httpServer.listen(post, () => {
     console.log(`server running in post ${post}`)
