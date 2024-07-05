@@ -18,6 +18,7 @@ const io = new Server(httpServer, { pingInterval: 2000, pingTimeout: 4000 })
 
 var colors = CHAR_COLORS
 var players = {}
+var bullets = {}
 var directions = {}
 
 function getRandomColor() {
@@ -133,6 +134,9 @@ function updatePlayerPosition() {
         players[id].position = updatedPosition
     })
 }
+function getDistance(position) {
+    return Math.sqrt(position.x ** 2 + position.y ** 2)
+}
 
 app.use(express.static('public'))
 app.get('/', (req, res) => {
@@ -144,22 +148,25 @@ io.on('connection', (socket) => {
 
     sendPlayers()
 
-    socket.on('disconnect', () => {
-        if (players[id]) {
-            colors.push(players[id].color)
-            delete players[id]
-            delete directions[id]
-        }
-    })
     socket.on('addPlayer', (name) => {
         players[id] = {
             position: getRandomPosition(),
             color: getRandomColor(),
             point: 0,
             name,
-            gunRotateDegree: 0,
+            mousePosition: {
+                x: 0,
+                y: 0,
+            },
         }
         directions[id] = new Set()
+    })
+    socket.on('disconnect', () => {
+        if (!players[id]) return
+
+        colors.push(players[id].color)
+        delete players[id]
+        delete directions[id]
     })
     socket.on('keydown', (keycode) => {
         if (!directions[id]) return
@@ -198,9 +205,15 @@ io.on('connection', (socket) => {
     socket.on('windowBlur', () => {
         directions[id] = new Set()
     })
-
-    socket.on('changeGunRotateDegree', (rotation) => {
-        if (players[id]) players[id].gunRotateDegree = rotation
+    socket.on('mousemove', (mousePosition) => {
+        if (!players[id]) return
+        players[id].mousePosition = mousePosition
+    })
+    socket.on('shoot', (mousePosition) => {
+        bullets[id] = {
+            position: players[id].position,
+            direction: {},
+        }
     })
 })
 setInterval(() => {

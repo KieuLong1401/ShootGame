@@ -9,7 +9,7 @@ class Player {
         this.color = player.color
         this.point = player.point
         this.name = player.name
-        this.gunRotateDegree = player.gunRotateDegree
+        this.mousePosition = player.mousePosition
     }
 
     render(ctx) {
@@ -28,17 +28,15 @@ class Player {
     renderGun(ctx) {
         const gunWidth = 30
         const gunHeight = 20
-
-        // ctx.setTransform(1, 0, 0, 1, this.position.x, this.position.y)
-        // ctx.rotate(this.gunRotateDegree)
-        ctx.fillStyle = 'white'
-        ctx.fillRect(
-            this.position.x + this.size - 5,
-            this.position.y - gunHeight / 2,
-            gunWidth,
-            gunHeight
+        const gunRotateDegree = Math.atan2(
+            this.mousePosition.y - this.position.y,
+            this.mousePosition.x - this.position.x
         )
 
+        ctx.setTransform(1, 0, 0, 1, this.position.x, this.position.y)
+        ctx.rotate(gunRotateDegree)
+
+        ctx.fillRect(this.size - 5, -gunHeight / 2, gunWidth, gunHeight)
         ctx.setTransform(1, 0, 0, 1, 0, 0)
     }
     renderName(ctx) {
@@ -48,8 +46,14 @@ class Player {
         ctx.font = `900 ${fontSize}px Arial`
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
-        ctx.fillStyle = this.color
+        ctx.fillStyle = 'white'
+        ctx.strokeStyle = 'black'
 
+        ctx.strokeText(
+            this.name,
+            this.position.x,
+            this.position.y + this.size + spaceFromBodyToName
+        )
         ctx.fillText(
             this.name,
             this.position.x,

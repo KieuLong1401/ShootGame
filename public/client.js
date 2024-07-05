@@ -32,13 +32,14 @@ socket.on('connect', () => {
         myGame.render()
         renderPlayers()
     }
-    function getMousePos(canvas, e) {
-        var rect = canvas.getBoundingClientRect()
-        var mouseX = e.clientX - rect.top
-        var mouseY = e.clientY - rect.left
+    function getMousePositionInCanvas() {
+        const rect = canvas.getBoundingClientRect()
+        const x = e.clientX - rect.top
+        const y = e.clientY - rect.left
+
         return {
-            x: mouseX,
-            y: mouseY,
+            x,
+            y,
         }
     }
 
@@ -53,15 +54,18 @@ socket.on('connect', () => {
     window.addEventListener('blur', () => {
         socket.emit('windowBlur')
     })
+    window.addEventListener('click', (e) => {
+        const mousePosition = getMousePositionInCanvas
+        socket.emit('shoot', mousePosition)
+    })
 
     canvas.addEventListener('mousemove', (e) => {
         if (!frontendPlayers[id]) return
-        const mousePosition = getMousePos(canvas, e)
-        const rotation = Math.atan2(
-            mousePosition.y - frontendPlayers[id].position.y,
-            mousePosition.x - frontendPlayers[id].position.x
-        )
-        socket.emit('changeGunRotateDegree', rotation)
+        const rect = canvas.getBoundingClientRect()
+        const x = e.clientX - rect.top
+        const y = e.clientY - rect.left
+
+        socket.emit('mousemove', getMousePositionInCanvas(e))
     })
 
     socket.on('updatePlayers', (backendPlayers) => {
