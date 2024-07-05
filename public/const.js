@@ -9,3 +9,4 @@ export const CHAR_COLORS = [
 ]
 export const PLAYER_SPAWN_RANGE = 500
 export const PLAYER_START_SIZE = 40
+export const BULLET_SPEED = 5

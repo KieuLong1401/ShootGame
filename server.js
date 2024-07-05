@@ -7,6 +7,7 @@ import {
     CHAR_COLORS,
     PLAYER_SPAWN_RANGE,
     PLAYER_START_SIZE,
+    BULLET_SPEED,
 } from './public/const.js'
 import path from 'path'
 
@@ -20,6 +21,7 @@ var colors = CHAR_COLORS
 var players = {}
 var bullets = {}
 var directions = {}
+var bulletDirections = {}
 
 function getRandomColor() {
     const randomIndex = Math.floor(Math.random() * colors.length)
@@ -34,6 +36,9 @@ function getRandomPosition() {
 }
 function sendPlayers() {
     io.emit('updatePlayers', players)
+}
+function sendBullets() {
+    io.emit('updateBullets', bullets)
 }
 function relocatePlayer(id, speed) {
     if (players[id].position.y < PLAYER_START_SIZE + players[id].point / 10) {
@@ -59,6 +64,15 @@ function relocatePlayer(id, speed) {
             GAME_MAX_SIZE - (PLAYER_START_SIZE + players[id].point / 10)
     }
 }
+function isDiagonalDirection(direction) {
+    if (
+        !(directions[id].has('up') && directions[id].has('down')) &&
+        !(directions[id].has('left') && directions[id].has('right'))
+    ) {
+        if (directions[id].size == 2) return true
+    }
+    return false
+}
 function updatePlayerPosition() {
     Object.keys(directions).forEach((id) => {
         if (!players[id]) return
@@ -67,18 +81,10 @@ function updatePlayerPosition() {
             LOWEST_SPEED,
             LOWEST_SPEED * 2 - Math.floor(players[id].point / 500)
         )
-
-        const isDiagonalDirection = directions[id].size == 2
-
-        if (
-            !(directions[id].has('up') && directions[id].has('down')) &&
-            !(directions[id].has('left') && directions[id].has('right'))
-        ) {
-            if (isDiagonalDirection) speed = Math.sqrt(speed ** 2 / 2)
-        }
+        if (isDiagonalDirection(directions[id]))
+            speed = Math.sqrt(speed ** 2 / 2)
 
         const updatedPosition = players[id].position
-
         Array.from(directions[id].entries()).forEach((direction) => {
             switch (direction[0]) {
                 case 'up':
@@ -131,11 +137,20 @@ function updatePlayerPosition() {
                     break
             }
         })
+
         players[id].position = updatedPosition
     })
 }
-function getDistance(position) {
-    return Math.sqrt(position.x ** 2 + position.y ** 2)
+function updateBulletPosition() {
+    Object.keys(bulletDirections).forEach((id) => {
+        if (bullets[id]) return
+
+        bullets[id].position.x += bulletDirections[id].velocityX
+        bullets[id].position.y += bulletDirections[id].velocityY
+    })
+}
+function getDistance(dx, dy) {
+    return Math.sqrt(dx ** 2 + dy ** 2)
 }
 
 app.use(express.static('public'))
@@ -210,15 +225,33 @@ io.on('connection', (socket) => {
         players[id].mousePosition = mousePosition
     })
     socket.on('shoot', (mousePosition) => {
+        if (!players[id]) return
+
+        const distanceX = mousePosition.x - players[id].position.x
+        const distanceY = mousePosition.y - players[id].position.y
+        const distance = getDistance(distanceX, distanceY)
+
+        if (distance == 0) return
+
+        const factor = BULLET_SPEED / distance
+        const velocityX = distanceX * factor
+        const velocityY = distanceY * factor
+
         bullets[id] = {
             position: players[id].position,
-            direction: {},
+        }
+
+        bulletDirections[id] = {
+            velocityX,
+            velocityY,
         }
     })
 })
 setInterval(() => {
     updatePlayerPosition()
     sendPlayers()
+    updateBulletPosition()
+    sendBullets()
 }, 16)
 
 httpServer.listen(post, () => {
