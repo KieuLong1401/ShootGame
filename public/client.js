@@ -4,7 +4,6 @@ import Game from './classes/Game.js'
 const socket = io()
 socket.on('connect', () => {
     var id = socket.id
-    console.log(id)
 
     const menu = document.querySelector('#menu')
     const joinBtn = document.querySelector('#joinBtn')
@@ -16,7 +15,7 @@ socket.on('connect', () => {
     var animationId
 
     function addPlayer() {
-        if (!Object.keys(frontendPlayers).includes(socket.id)) {
+        if (!Object.keys(frontendPlayers).includes(id)) {
             socket.emit('addPlayer', 'long')
             menu.classList.add('hide')
         }
@@ -33,6 +32,15 @@ socket.on('connect', () => {
         myGame.render()
         renderPlayers()
     }
+    function getMousePos(canvas, e) {
+        var rect = canvas.getBoundingClientRect()
+        var mouseX = e.clientX - rect.top
+        var mouseY = e.clientY - rect.left
+        return {
+            x: mouseX,
+            y: mouseY,
+        }
+    }
 
     joinBtn.addEventListener('click', addPlayer)
 
@@ -41,6 +49,19 @@ socket.on('connect', () => {
     })
     window.addEventListener('keyup', (event) => {
         socket.emit('keyup', event.code)
+    })
+    window.addEventListener('blur', () => {
+        socket.emit('windowBlur')
+    })
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!frontendPlayers[id]) return
+        const mousePosition = getMousePos(canvas, e)
+        const rotation = Math.atan2(
+            mousePosition.y - frontendPlayers[id].position.y,
+            mousePosition.x - frontendPlayers[id].position.x
+        )
+        socket.emit('changeGunRotateDegree', rotation)
     })
 
     socket.on('updatePlayers', (backendPlayers) => {
@@ -55,7 +76,6 @@ socket.on('connect', () => {
         backendPlayerIds.forEach((e) => {
             const player = new Player(backendPlayers[e])
             frontendPlayers[e] = player
-            console.log(frontendPlayers[e].position)
         })
     })
 

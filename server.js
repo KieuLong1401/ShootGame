@@ -1,17 +1,24 @@
-const express = require('express')
-const { createServer } = require('http')
-const { Server } = require('socket.io')
+import express from 'express'
+import { createServer } from 'http'
+import { Server } from 'socket.io'
+import {
+    LOWEST_SPEED,
+    GAME_MAX_SIZE,
+    CHAR_COLORS,
+    PLAYER_SPAWN_RANGE,
+    PLAYER_START_SIZE,
+} from './public/const.js'
+import path from 'path'
 
 const post = 3000
+const __dirname = path.resolve(path.dirname(''))
 const app = express()
 const httpServer = createServer(app)
 const io = new Server(httpServer, { pingInterval: 2000, pingTimeout: 4000 })
 
-const colors = ['#39FF14', '#FF6EC7', '#00FFFF', '#FFFF00', '#FFA500']
-const gameMaxSize = 500
+var colors = CHAR_COLORS
 var players = {}
 var directions = {}
-var intervalId
 
 function getRandomColor() {
     const randomIndex = Math.floor(Math.random() * colors.length)
@@ -20,69 +27,110 @@ function getRandomColor() {
 }
 function getRandomPosition() {
     return {
-        x: Math.floor(500 * Math.random() + 40),
-        y: Math.floor(500 * Math.random() + 40),
+        x: Math.floor(PLAYER_SPAWN_RANGE * Math.random() + PLAYER_START_SIZE),
+        y: Math.floor(PLAYER_SPAWN_RANGE * Math.random() + PLAYER_START_SIZE),
     }
 }
 function sendPlayers() {
     io.emit('updatePlayers', players)
 }
-function updatePlayer(id, value) {
-    if (value == null) {
-        delete players[id]
-    } else {
-        players[id] = value
+function relocatePlayer(id, speed) {
+    if (players[id].position.y < PLAYER_START_SIZE + players[id].point / 10) {
+        players[id].position.y = PLAYER_START_SIZE + players[id].point / 10
+    }
+    if (players[id].position.x < PLAYER_START_SIZE + players[id].point / 10) {
+        players[id].position.x = PLAYER_START_SIZE + players[id].point / 10
     }
 
-    sendPlayers()
+    if (
+        players[id].position.x >
+        GAME_MAX_SIZE - (PLAYER_START_SIZE + players[id].point / 10)
+    ) {
+        players[id].position.x =
+            GAME_MAX_SIZE - (PLAYER_START_SIZE + players[id].point / 10)
+    }
+
+    if (
+        players[id].position.y >
+        GAME_MAX_SIZE - (PLAYER_START_SIZE + players[id].point / 10)
+    ) {
+        players[id].position.y =
+            GAME_MAX_SIZE - (PLAYER_START_SIZE + players[id].point / 10)
+    }
 }
 function updatePlayerPosition() {
     Object.keys(directions).forEach((id) => {
         if (!players[id]) return
 
-        var speed = Math.max(5, 10 - Math.floor(players[id].point / 500))
+        var speed = Math.max(
+            LOWEST_SPEED,
+            LOWEST_SPEED * 2 - Math.floor(players[id].point / 500)
+        )
 
         const isDiagonalDirection = directions[id].size == 2
-        if (isDiagonalDirection) speed = Math.sqrt(speed ** 2 / 2)
+
+        if (
+            !(directions[id].has('up') && directions[id].has('down')) &&
+            !(directions[id].has('left') && directions[id].has('right'))
+        ) {
+            if (isDiagonalDirection) speed = Math.sqrt(speed ** 2 / 2)
+        }
 
         const updatedPosition = players[id].position
 
         Array.from(directions[id].entries()).forEach((direction) => {
             switch (direction[0]) {
                 case 'up':
-                    if (updatedPosition.y - speed < 0) {
-                        updatedPosition.y = 0
+                    if (
+                        updatedPosition.y - speed <
+                        PLAYER_START_SIZE + players[id].point / 10
+                    ) {
+                        updatedPosition.y =
+                            PLAYER_START_SIZE + players[id].point / 10
                     } else {
                         updatedPosition.y -= speed
                     }
                     break
                 case 'left':
-                    if (updatedPosition.x - speed < 0) {
-                        updatedPosition.x = 0
+                    if (
+                        updatedPosition.x - speed <
+                        PLAYER_START_SIZE + players[id].point / 10
+                    ) {
+                        updatedPosition.x =
+                            PLAYER_START_SIZE + players[id].point / 10
                     } else {
                         updatedPosition.x -= speed
                     }
                     break
                 case 'right':
-                    if (updatedPosition.x + speed > gameMaxSize) {
-                        updatedPosition.x = gameMaxSize
+                    if (
+                        updatedPosition.x + speed >
+                        GAME_MAX_SIZE -
+                            (PLAYER_START_SIZE + players[id].point / 10)
+                    ) {
+                        updatedPosition.x =
+                            GAME_MAX_SIZE -
+                            (PLAYER_START_SIZE + players[id].point / 10)
                     } else {
                         updatedPosition.x += speed
                     }
                     break
                 case 'down':
-                    if (updatedPosition.y + speed > gameMaxSize) {
-                        updatedPosition.y = gameMaxSize
+                    if (
+                        updatedPosition.y + speed >
+                        GAME_MAX_SIZE -
+                            (PLAYER_START_SIZE + players[id].point / 10)
+                    ) {
+                        updatedPosition.y =
+                            GAME_MAX_SIZE -
+                            (PLAYER_START_SIZE + players[id].point / 10)
                     } else {
                         updatedPosition.y += speed
                     }
                     break
             }
         })
-        updatePlayer(id, {
-            ...players[id],
-            position: updatedPosition,
-        })
+        players[id].position = updatedPosition
     })
 }
 
@@ -99,36 +147,33 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         if (players[id]) {
             colors.push(players[id].color)
-            updatePlayer(id, null)
+            delete players[id]
             delete directions[id]
         }
     })
     socket.on('addPlayer', (name) => {
-        updatePlayer(id, {
+        players[id] = {
             position: getRandomPosition(),
             color: getRandomColor(),
             point: 0,
             name,
-        })
+            gunRotateDegree: 0,
+        }
         directions[id] = new Set()
     })
     socket.on('keydown', (keycode) => {
         if (!directions[id]) return
         switch (keycode) {
             case 'KeyW':
-                if (directions[id].has('down')) return
                 directions[id].add('up')
                 break
             case 'KeyA':
-                if (directions[id].has('right')) return
                 directions[id].add('left')
                 break
             case 'KeyD':
-                if (directions[id].has('left')) return
                 directions[id].add('right')
                 break
             case 'KeyS':
-                if (directions[id].has('up')) return
                 directions[id].add('down')
                 break
         }
@@ -150,12 +195,18 @@ io.on('connection', (socket) => {
                 break
         }
     })
+    socket.on('windowBlur', () => {
+        directions[id] = new Set()
+    })
 
-    clearInterval(intervalId)
-    intervalId = setInterval(() => {
-        updatePlayerPosition()
-    }, 16)
+    socket.on('changeGunRotateDegree', (rotation) => {
+        if (players[id]) players[id].gunRotateDegree = rotation
+    })
 })
+setInterval(() => {
+    updatePlayerPosition()
+    sendPlayers()
+}, 16)
 
 httpServer.listen(post, () => {
     console.log(`server running in post ${post}`)
