@@ -1,25 +1,28 @@
-import { GAME_MAX_SIZE } from '../const.js'
+import { CAMERA_HEIGHT, CAMERA_WIDTH, GAME_SIZE } from '../const.js'
 
 class Game {
     constructor(canvas) {
-        canvas.width = innerWidth
-        canvas.height = innerHeight
-
+        this.canvas = canvas
         this.ctx = canvas.getContext('2d')
-        this.canvasWidth = canvas.width
-        this.canvasHeight = canvas.height
-
-        this.render = this.render.bind(this)
+        this.playerPosition = {
+            x: GAME_SIZE / 2,
+            y: GAME_SIZE / 2,
+        }
     }
 
     render() {
-        this.ctx.clearRect(0, 0, GAME_MAX_SIZE, GAME_MAX_SIZE)
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
         this.ctx.fillStyle = 'black'
-        this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight)
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
 
         this.ctx.strokeStyle = 'white'
-        this.ctx.strokeRect(0, 0, GAME_MAX_SIZE, GAME_MAX_SIZE)
+        this.ctx.strokeRect(
+            this.canvas.width / 2 - this.playerPosition.x,
+            this.canvas.height / 2 - this.playerPosition.y,
+            GAME_SIZE,
+            GAME_SIZE
+        )
     }
 }
 

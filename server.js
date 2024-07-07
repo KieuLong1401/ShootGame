@@ -2,12 +2,14 @@ import express from 'express'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import {
-    LOWEST_SPEED,
-    GAME_MAX_SIZE,
+    GAME_SIZE,
+    CAMERA_WIDTH,
+    CAMERA_HEIGHT,
     CHAR_COLORS,
-    PLAYER_SPAWN_RANGE,
-    PLAYER_START_SIZE,
+    PLAYER_SIZE,
+    LOWEST_SPEED,
     BULLET_SPEED,
+    BULLET_WIDTH,
 } from './public/const.js'
 import path from 'path'
 
@@ -19,9 +21,8 @@ const io = new Server(httpServer, { pingInterval: 2000, pingTimeout: 4000 })
 
 var colors = CHAR_COLORS
 var players = {}
-var bullets = {}
+var bullets = []
 var directions = {}
-var bulletDirections = {}
 
 function getRandomColor() {
     const randomIndex = Math.floor(Math.random() * colors.length)
@@ -30,48 +31,65 @@ function getRandomColor() {
 }
 function getRandomPosition() {
     return {
-        x: Math.floor(PLAYER_SPAWN_RANGE * Math.random() + PLAYER_START_SIZE),
-        y: Math.floor(PLAYER_SPAWN_RANGE * Math.random() + PLAYER_START_SIZE),
+        x: Math.floor(
+            Math.random() * (GAME_SIZE - PLAYER_SIZE * 2) + PLAYER_SIZE
+        ),
+        y: Math.floor(
+            Math.random() * (GAME_SIZE - PLAYER_SIZE * 2) + PLAYER_SIZE
+        ),
     }
 }
+function getDistance(position1, position2) {
+    const distanceX = position1.x - position2.x
+    const distanceY = position1.y - position2.y
+
+    return Math.sqrt(distanceX ** 2 + distanceY ** 2)
+}
+
 function sendPlayers() {
     io.emit('updatePlayers', players)
 }
 function sendBullets() {
     io.emit('updateBullets', bullets)
 }
-function relocatePlayer(id, speed) {
-    if (players[id].position.y < PLAYER_START_SIZE + players[id].point / 10) {
-        players[id].position.y = PLAYER_START_SIZE + players[id].point / 10
+function emitData() {
+    sendPlayers()
+    sendBullets()
+}
+
+function isDiagonalDirection(direction) {
+    if (
+        !(direction.has('up') && direction.has('down')) &&
+        !(direction.has('left') && direction.has('right'))
+    ) {
+        if (direction.size == 2) return true
     }
-    if (players[id].position.x < PLAYER_START_SIZE + players[id].point / 10) {
-        players[id].position.x = PLAYER_START_SIZE + players[id].point / 10
+    return false
+}
+
+function relocatePlayer(id, speed) {
+    if (players[id].position.y < PLAYER_SIZE + players[id].point / 10) {
+        players[id].position.y = PLAYER_SIZE + players[id].point / 10
+    }
+    if (players[id].position.x < PLAYER_SIZE + players[id].point / 10) {
+        players[id].position.x = PLAYER_SIZE + players[id].point / 10
     }
 
     if (
         players[id].position.x >
-        GAME_MAX_SIZE - (PLAYER_START_SIZE + players[id].point / 10)
+        CAMERA_WIDTH - (PLAYER_SIZE + players[id].point / 10)
     ) {
         players[id].position.x =
-            GAME_MAX_SIZE - (PLAYER_START_SIZE + players[id].point / 10)
+            CAMERA_WIDTH - (PLAYER_SIZE + players[id].point / 10)
     }
 
     if (
         players[id].position.y >
-        GAME_MAX_SIZE - (PLAYER_START_SIZE + players[id].point / 10)
+        CAMERA_HEIGHT - (PLAYER_SIZE + players[id].point / 10)
     ) {
         players[id].position.y =
-            GAME_MAX_SIZE - (PLAYER_START_SIZE + players[id].point / 10)
+            CAMERA_HEIGHT - (PLAYER_SIZE + players[id].point / 10)
     }
-}
-function isDiagonalDirection(direction) {
-    if (
-        !(directions[id].has('up') && directions[id].has('down')) &&
-        !(directions[id].has('left') && directions[id].has('right'))
-    ) {
-        if (directions[id].size == 2) return true
-    }
-    return false
 }
 function updatePlayerPosition() {
     Object.keys(directions).forEach((id) => {
@@ -88,49 +106,29 @@ function updatePlayerPosition() {
         Array.from(directions[id].entries()).forEach((direction) => {
             switch (direction[0]) {
                 case 'up':
-                    if (
-                        updatedPosition.y - speed <
-                        PLAYER_START_SIZE + players[id].point / 10
-                    ) {
-                        updatedPosition.y =
-                            PLAYER_START_SIZE + players[id].point / 10
+                    if (updatedPosition.y - speed < PLAYER_SIZE) {
+                        updatedPosition.y = PLAYER_SIZE
                     } else {
                         updatedPosition.y -= speed
                     }
                     break
                 case 'left':
-                    if (
-                        updatedPosition.x - speed <
-                        PLAYER_START_SIZE + players[id].point / 10
-                    ) {
-                        updatedPosition.x =
-                            PLAYER_START_SIZE + players[id].point / 10
+                    if (updatedPosition.x - speed < PLAYER_SIZE) {
+                        updatedPosition.x = PLAYER_SIZE
                     } else {
                         updatedPosition.x -= speed
                     }
                     break
                 case 'right':
-                    if (
-                        updatedPosition.x + speed >
-                        GAME_MAX_SIZE -
-                            (PLAYER_START_SIZE + players[id].point / 10)
-                    ) {
-                        updatedPosition.x =
-                            GAME_MAX_SIZE -
-                            (PLAYER_START_SIZE + players[id].point / 10)
+                    if (updatedPosition.x + speed > GAME_SIZE - PLAYER_SIZE) {
+                        updatedPosition.x = GAME_SIZE - PLAYER_SIZE
                     } else {
                         updatedPosition.x += speed
                     }
                     break
                 case 'down':
-                    if (
-                        updatedPosition.y + speed >
-                        GAME_MAX_SIZE -
-                            (PLAYER_START_SIZE + players[id].point / 10)
-                    ) {
-                        updatedPosition.y =
-                            GAME_MAX_SIZE -
-                            (PLAYER_START_SIZE + players[id].point / 10)
+                    if (updatedPosition.y + speed > GAME_SIZE - PLAYER_SIZE) {
+                        updatedPosition.y = GAME_SIZE - PLAYER_SIZE
                     } else {
                         updatedPosition.y += speed
                     }
@@ -142,15 +140,46 @@ function updatePlayerPosition() {
     })
 }
 function updateBulletPosition() {
-    Object.keys(bulletDirections).forEach((id) => {
-        if (bullets[id]) return
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        if (
+            bullets[i].position.x < 0 ||
+            bullets[i].position.y < 0 ||
+            bullets[i].position.x > GAME_SIZE ||
+            bullets[i].position.y > GAME_SIZE
+        ) {
+            bullets.splice(i, 1)
+        } else {
+            bullets[i].position.x += bullets[i].velocity.x
+            bullets[i].position.y += bullets[i].velocity.y
 
-        bullets[id].position.x += bulletDirections[id].velocityX
-        bullets[id].position.y += bulletDirections[id].velocityY
-    })
+            for (let playerId in players) {
+                if (
+                    getDistance(
+                        players[playerId].position,
+                        bullets[i].position
+                    ) <=
+                        PLAYER_SIZE + BULLET_WIDTH / 2 &&
+                    bullets[i].id != playerId
+                ) {
+                    bullets.splice(i, 1)
+                    deletePlayer(playerId)
+                    return
+                }
+            }
+        }
+    }
 }
-function getDistance(dx, dy) {
-    return Math.sqrt(dx ** 2 + dy ** 2)
+
+function deletePlayer(id) {
+    colors.push(players[id].color)
+    delete players[id]
+    delete directions[id]
+
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        if (bullets[i].id == id) {
+            bullets.splice(i, 1)
+        }
+    }
 }
 
 app.use(express.static('public'))
@@ -169,19 +198,14 @@ io.on('connection', (socket) => {
             color: getRandomColor(),
             point: 0,
             name,
-            mousePosition: {
-                x: 0,
-                y: 0,
-            },
+            gunRotateDegree: 0,
         }
         directions[id] = new Set()
     })
     socket.on('disconnect', () => {
         if (!players[id]) return
 
-        colors.push(players[id].color)
-        delete players[id]
-        delete directions[id]
+        deletePlayer(id)
     })
     socket.on('keydown', (keycode) => {
         if (!directions[id]) return
@@ -220,38 +244,29 @@ io.on('connection', (socket) => {
     socket.on('windowBlur', () => {
         directions[id] = new Set()
     })
-    socket.on('mousemove', (mousePosition) => {
+    socket.on('mousemove', (gunRotateDegree) => {
         if (!players[id]) return
-        players[id].mousePosition = mousePosition
+        players[id].gunRotateDegree = gunRotateDegree
     })
-    socket.on('shoot', (mousePosition) => {
+    socket.on('shoot', (gunRotateDegree) => {
         if (!players[id]) return
 
-        const distanceX = mousePosition.x - players[id].position.x
-        const distanceY = mousePosition.y - players[id].position.y
-        const distance = getDistance(distanceX, distanceY)
-
-        if (distance == 0) return
-
-        const factor = BULLET_SPEED / distance
-        const velocityX = distanceX * factor
-        const velocityY = distanceY * factor
-
-        bullets[id] = {
-            position: players[id].position,
-        }
-
-        bulletDirections[id] = {
-            velocityX,
-            velocityY,
-        }
+        bullets.push({
+            id,
+            position: { ...players[id].position },
+            velocity: {
+                x: Math.cos(gunRotateDegree) * BULLET_SPEED,
+                y: Math.sin(gunRotateDegree) * BULLET_SPEED,
+            },
+            rotateDegree: gunRotateDegree,
+            color: players[id].color,
+        })
     })
 })
 setInterval(() => {
     updatePlayerPosition()
-    sendPlayers()
     updateBulletPosition()
-    sendBullets()
+    emitData()
 }, 16)
 
 httpServer.listen(post, () => {

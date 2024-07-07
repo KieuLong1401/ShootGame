@@ -1,4 +1,4 @@
-import { PLAYER_START_SIZE } from '../const.js'
+import { PLAYER_SIZE } from '../const.js'
 
 class Player {
     constructor(player) {
@@ -9,7 +9,8 @@ class Player {
         this.color = player.color
         this.point = player.point
         this.name = player.name
-        this.mousePosition = player.mousePosition
+        this.gunRotateDegree = player.gunRotateDegree
+        this.size = PLAYER_SIZE + this.point / 10
     }
 
     render(ctx) {
@@ -18,7 +19,7 @@ class Player {
         this.renderName(ctx)
     }
     renderBody(ctx) {
-        this.size = PLAYER_START_SIZE + this.point / 10
+        this.size = PLAYER_SIZE + this.point / 10
 
         ctx.beginPath()
         ctx.arc(this.position.x, this.position.y, this.size, 0, 2 * Math.PI)
@@ -28,13 +29,9 @@ class Player {
     renderGun(ctx) {
         const gunWidth = 30
         const gunHeight = 20
-        const gunRotateDegree = Math.atan2(
-            this.mousePosition.y - this.position.y,
-            this.mousePosition.x - this.position.x
-        )
 
         ctx.setTransform(1, 0, 0, 1, this.position.x, this.position.y)
-        ctx.rotate(gunRotateDegree)
+        ctx.rotate(this.gunRotateDegree)
 
         ctx.fillRect(this.size - 5, -gunHeight / 2, gunWidth, gunHeight)
         ctx.setTransform(1, 0, 0, 1, 0, 0)
