@@ -1,6 +1,4 @@
-export const LOWEST_SPEED = 5
-export const CAMERA_WIDTH = 800
-export const CAMERA_HEIGHT = 500
+export const PLAYER_SPEED = 10
 export const GAME_SIZE = 1000
 export const CHAR_COLORS = [
     '#39FF14',
