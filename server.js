@@ -18,7 +18,7 @@ const post = 3000
 const __dirname = path.resolve(path.dirname(''))
 const app = express()
 const httpServer = createServer(app)
-const io = new Server(httpServer, { pingInterval: 2000, pingTimeout: 4000 })
+const io = new Server(httpServer, { pingInterval: 2000, pingTimeout: 4000, addTrailingSlash: false })
 
 var colors = CHAR_COLORS
 var players = {}
