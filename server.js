@@ -18,7 +18,13 @@ const post = 3000
 const __dirname = path.resolve(path.dirname(''))
 const app = express()
 const httpServer = createServer(app)
-const io = new Server(httpServer, { pingInterval: 2000, pingTimeout: 4000, addTrailingSlash: false })
+const io = new Server(httpServer, { pingInterval: 2000, pingTimeout: 4000, addTrailingSlash: false, cors: {
+            origin: "/",
+            methods: ["GET", "POST"],
+            credentials: true
+        },
+        transports: ['polling','websocket'],
+        allowEIO3: true })
 
 var colors = CHAR_COLORS
 var players = {}
