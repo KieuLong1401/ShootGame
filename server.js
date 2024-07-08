@@ -10,6 +10,7 @@ import {
     LOWEST_SPEED,
     BULLET_SPEED,
     BULLET_WIDTH,
+    BULLET_HEIGHT,
 } from './public/const.js'
 import path from 'path'
 
@@ -51,6 +52,7 @@ function sendPlayers() {
 }
 function sendBullets() {
     io.emit('updateBullets', bullets)
+    io.emit('sendCorner', bullets.map(e => getCorners(e)))
 }
 function emitData() {
     sendPlayers()
@@ -139,6 +141,53 @@ function updatePlayerPosition() {
         players[id].position = updatedPosition
     })
 }
+
+
+function checkCollision(character, bullet) {
+    const corners = getCorners(bullet);
+    for (let i = 0; i < corners.length; i++) {
+        if (pointInCircle(corners[i], character)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Hàm lấy các góc của viên đạn
+function getCorners(bullet) {
+    const halfWidth = BULLET_WIDTH / 2;
+    const halfHeight = BULLET_HEIGHT / 2;
+    const corners = [
+        { x: bullet.position.x - BULLET_WIDTH / 2 + 60 - halfWidth, y: bullet.position.y - BULLET_HEIGHT / 2 - halfHeight },
+        { x: bullet.position.x - BULLET_WIDTH / 2 + 60 + halfWidth, y: bullet.position.y - BULLET_HEIGHT / 2 - halfHeight },
+        { x: bullet.position.x - BULLET_WIDTH / 2 + 60 + halfWidth, y: bullet.position.y - BULLET_HEIGHT / 2 + halfHeight },
+        { x: bullet.position.x - BULLET_WIDTH / 2 + 60 - halfWidth, y: bullet.position.y - BULLET_HEIGHT / 2 + halfHeight },
+    ];
+    return corners.map(point => rotatePoint(bullet.position.x - BULLET_WIDTH / 2 + 60, bullet.position.y - BULLET_HEIGHT / 2, bullet.rotateDegree, point));
+}
+
+
+// Hàm xoay điểm quanh một tâm
+function rotatePoint(centerX, centerY, angle, point) {
+    const sinAngle = Math.sin(angle);
+    const cosAngle = Math.cos(angle);
+    point.x -= centerX;
+    point.y -= centerY;
+    const xNew = point.x * cosAngle - point.y * sinAngle;
+    const yNew = point.x * sinAngle + point.y * cosAngle;
+    point.x = xNew + centerX;
+    point.y = yNew + centerY;
+    return point;
+}
+
+// Hàm kiểm tra điểm nằm trong hình tròn
+function pointInCircle(point, player) {
+    const dx = point.x - player.position.x;
+    const dy = point.y - player.position.y;
+    return dx * dx + dy * dy <= PLAYER_SIZE * PLAYER_SIZE;
+}
+
+
 function updateBulletPosition() {
     for (let i = bullets.length - 1; i >= 0; i--) {
         if (
@@ -154,11 +203,10 @@ function updateBulletPosition() {
 
             for (let playerId in players) {
                 if (
-                    getDistance(
-                        players[playerId].position,
-                        bullets[i].position
-                    ) <=
-                        PLAYER_SIZE + BULLET_WIDTH / 2 &&
+                    checkCollision(
+                        players[playerId],
+                        bullets[i]
+                    ) &&
                     bullets[i].id != playerId
                 ) {
                     bullets.splice(i, 1)
@@ -253,7 +301,10 @@ io.on('connection', (socket) => {
 
         bullets.push({
             id,
-            position: { ...players[id].position },
+            position: { 
+                x: players[id].position.x,
+                y: players[id].position.y,
+            },
             velocity: {
                 x: Math.cos(gunRotateDegree) * BULLET_SPEED,
                 y: Math.sin(gunRotateDegree) * BULLET_SPEED,
