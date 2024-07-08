@@ -280,7 +280,7 @@ setInterval(() => {
     updatePlayerPosition()
     updateBulletPosition()
     emitData()
-}, 16)
+}, 33)
 
 httpServer.listen(post, () => {
     console.log(`server running in post ${post}`)

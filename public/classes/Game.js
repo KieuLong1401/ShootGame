@@ -4,7 +4,7 @@ class Game {
     constructor(canvas) {
         this.canvas = canvas
         this.ctx = canvas.getContext('2d')
-        this.playerPosition = {
+        this.basePosition = {
             x: GAME_SIZE / 2,
             y: GAME_SIZE / 2,
         }
@@ -18,8 +18,8 @@ class Game {
 
         this.ctx.strokeStyle = 'white'
         this.ctx.strokeRect(
-            this.canvas.width / 2 - this.playerPosition.x,
-            this.canvas.height / 2 - this.playerPosition.y,
+            this.canvas.width / 2 - this.basePosition.x,
+            this.canvas.height / 2 - this.basePosition.y,
             GAME_SIZE,
             GAME_SIZE
         )

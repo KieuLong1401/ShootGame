@@ -1,13 +1,14 @@
 import Player from './classes/Player.js'
 import Game from './classes/Game.js'
 import Bullet from './classes/Bullet.js'
-import { CAMERA_HEIGHT, CAMERA_WIDTH, GAME_SIZE } from './const.js'
+import { CAMERA_HEIGHT, CAMERA_WIDTH, GAME_SIZE, MAX_PLAYER } from './const.js'
 
 const socket = io()
 socket.on('connect', () => {
     const menu = document.querySelector('#menu')
     const joinBtn = document.querySelector('#joinBtn')
     const canvas = document.querySelector('#canvas')
+    const errorText = document.querySelector('#errorText')
     const myGame = new Game(canvas)
 
     var frontendPlayers = {}
@@ -23,9 +24,32 @@ socket.on('connect', () => {
     myGame.canvas.height = window.innerHeight
 
     function addPlayer() {
-        if (!Object.keys(frontendPlayers).includes(id)) {
-            socket.emit('addPlayer', 'long')
-            menu.classList.add('hide')
+        const playerIds = Object.keys(frontendPlayers)
+        const name = document.querySelector('#nameInput').value
+        
+        if(playerIds.includes(id)) return
+        if (playerIds.length >= MAX_PLAYER) {
+            errorText.innerHTML = 'full slot'
+            return
+        } 
+        if(name == '') {
+            errorText.innerHTML = 'please enter your name'
+            return
+        }
+
+        socket.emit('addPlayer', name)
+    }
+
+    function getPositionInCamera(position) {
+        return {
+            x:
+                position.x -
+                basePosition.x +
+                myGame.canvas.width / 2,
+            y:
+                position.y -
+                basePosition.y +
+                myGame.canvas.height / 2,
         }
     }
 
@@ -40,7 +64,7 @@ socket.on('connect', () => {
             e.render(myGame.ctx)
         })
     }
-    function animate() {
+    function animate() { 
         animationId = requestAnimationFrame(animate)
 
         myGame.render()
@@ -59,7 +83,7 @@ socket.on('connect', () => {
                 event.key === '+')
         ) {
             event.preventDefault()
-        } else {
+        } else if(event.code == 'KeyW' || event.code == 'KeyA' || event.code == 'KeyS' || event.code == 'KeyD') {
             socket.emit('keydown', event.code)
         }
     })
@@ -110,9 +134,13 @@ socket.on('connect', () => {
         const frontendPlayerIds = Object.keys(frontendPlayers)
         const backendPlayerIds = Object.keys(backendPlayers)
 
-        if (backendPlayers[id]) {
-            basePosition = backendPlayers[id].position
-            myGame.playerPosition = basePosition
+        const myPlayer = backendPlayers[id]
+
+        if (!!myPlayer) {
+            basePosition = myPlayer.position
+            myGame.basePosition = basePosition
+
+            menu.classList.add('hide')
         } else {
             menu.classList.remove('hide')
         }
@@ -125,16 +153,7 @@ socket.on('connect', () => {
         backendPlayerIds.forEach((playerId) => {
             const player = new Player({
                 ...backendPlayers[playerId],
-                position: {
-                    x:
-                        backendPlayers[playerId].position.x -
-                        basePosition.x +
-                        myGame.canvas.width / 2,
-                    y:
-                        backendPlayers[playerId].position.y -
-                        basePosition.y +
-                        myGame.canvas.height / 2,
-                },
+                position: getPositionInCamera(backendPlayers[playerId].position),
             })
             frontendPlayers[playerId] = player
         })
@@ -144,16 +163,7 @@ socket.on('connect', () => {
         backendBullets.forEach((bullet) => {
             const frontendBullet = new Bullet({
                 ...bullet,
-                position: {
-                    x:
-                        bullet.position.x -
-                        basePosition.x +
-                        myGame.canvas.width / 2,
-                    y:
-                        bullet.position.y -
-                        basePosition.y +
-                        myGame.canvas.height / 2,
-                },
+                position: getPositionInCamera(bullet.position),
             })
             frontendBullets.push(frontendBullet)
         })
