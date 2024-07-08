@@ -48,7 +48,11 @@ socket.on('connect', () => {
         corners.forEach(e => {
             e.forEach(a => {
                 myGame.ctx.fillStyle = 'white'
-                myGame.ctx.fillRect(a.x, a.y, 10, 10)
+                myGame.ctx.fillRect(a.x-
+                    basePosition.x +
+                    myGame.canvas.width / 2, a.y-
+                    basePosition.y +
+                    myGame.canvas.height / 2, 10, 10)
             })
         })
         renderBullets()
