@@ -163,7 +163,7 @@ function getCorners(bullet) {
         { x: bullet.position.x - BULLET_WIDTH / 2 + 60 + halfWidth, y: bullet.position.y - BULLET_HEIGHT / 2 + halfHeight },
         { x: bullet.position.x - BULLET_WIDTH / 2 + 60 - halfWidth, y: bullet.position.y - BULLET_HEIGHT / 2 + halfHeight },
     ];
-    return corners.map(point => rotatePoint(bullet.position.x - BULLET_WIDTH / 2 + 60, bullet.position.y - BULLET_HEIGHT / 2, bullet.rotateDegree, point));
+    return corners.map(point => rotatePoint(bullet.position.x, bullet.position.y, bullet.rotateDegree, point));
 }
 
 
