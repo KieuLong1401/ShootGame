@@ -15,5 +15,8 @@
         "socket.io": "^4.7.5"
     },
     "type": "module",
-    "devDependencies": {}
+    "devDependencies": {},
+    "engines": {
+        "node": "18.x"
+    }
 }
