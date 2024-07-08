@@ -40,11 +40,27 @@ function getRandomPosition() {
         ),
     }
 }
-function getDistance(position1, position2) {
-    const distanceX = position1.x - position2.x
-    const distanceY = position1.y - position2.y
-
-    return Math.sqrt(distanceX ** 2 + distanceY ** 2)
+function getCorners(bullet) {
+    const halfWidth = BULLET_WIDTH / 2;
+    const halfHeight = BULLET_HEIGHT / 2;
+    const corners = [
+        { x: bullet.position.x + 60 - halfWidth, y: bullet.position.y - halfHeight },
+        { x: bullet.position.x + 60 + halfWidth, y: bullet.position.y - halfHeight },
+        { x: bullet.position.x + 60 + halfWidth, y: bullet.position.y + halfHeight },
+        { x: bullet.position.x + 60 - halfWidth, y: bullet.position.y + halfHeight },
+    ];
+    return corners.map(point => getRotatedPoint(bullet.position.x, bullet.position.y, bullet.rotateDegree, point));
+}
+function getRotatedPoint(centerX, centerY, angle, point) {
+    const sinAngle = Math.sin(angle);
+    const cosAngle = Math.cos(angle);
+    point.x -= centerX;
+    point.y -= centerY;
+    const xNew = point.x * cosAngle - point.y * sinAngle;
+    const yNew = point.x * sinAngle + point.y * cosAngle;
+    point.x = xNew + centerX;
+    point.y = yNew + centerY;
+    return point;
 }
 
 function sendPlayers() {
@@ -52,7 +68,6 @@ function sendPlayers() {
 }
 function sendBullets() {
     io.emit('updateBullets', bullets)
-    io.emit('sendCorner', bullets.map(e => getCorners(e)))
 }
 function emitData() {
     sendPlayers()
@@ -68,31 +83,21 @@ function isDiagonalDirection(direction) {
     }
     return false
 }
-
-function relocatePlayer(id, speed) {
-    if (players[id].position.y < PLAYER_SIZE + players[id].point / 10) {
-        players[id].position.y = PLAYER_SIZE + players[id].point / 10
+function checkCollision(character, bullet) {
+    const corners = getCorners(bullet);
+    for (let i = 0; i < corners.length; i++) {
+        if (pointInCircle(corners[i], character)) {
+            return true;
+        }
     }
-    if (players[id].position.x < PLAYER_SIZE + players[id].point / 10) {
-        players[id].position.x = PLAYER_SIZE + players[id].point / 10
-    }
-
-    if (
-        players[id].position.x >
-        CAMERA_WIDTH - (PLAYER_SIZE + players[id].point / 10)
-    ) {
-        players[id].position.x =
-            CAMERA_WIDTH - (PLAYER_SIZE + players[id].point / 10)
-    }
-
-    if (
-        players[id].position.y >
-        CAMERA_HEIGHT - (PLAYER_SIZE + players[id].point / 10)
-    ) {
-        players[id].position.y =
-            CAMERA_HEIGHT - (PLAYER_SIZE + players[id].point / 10)
-    }
+    return false;
 }
+function pointInCircle(point, player) {
+    const dx = point.x - player.position.x;
+    const dy = point.y - player.position.y;
+    return dx * dx + dy * dy <= PLAYER_SIZE * PLAYER_SIZE;
+}
+
 function updatePlayerPosition() {
     Object.keys(directions).forEach((id) => {
         if (!players[id]) return
@@ -141,53 +146,6 @@ function updatePlayerPosition() {
         players[id].position = updatedPosition
     })
 }
-
-
-function checkCollision(character, bullet) {
-    const corners = getCorners(bullet);
-    for (let i = 0; i < corners.length; i++) {
-        if (pointInCircle(corners[i], character)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// Hàm lấy các góc của viên đạn
-function getCorners(bullet) {
-    const halfWidth = BULLET_WIDTH / 2;
-    const halfHeight = BULLET_HEIGHT / 2;
-    const corners = [
-        { x: bullet.position.x - BULLET_WIDTH / 2 + 60 - halfWidth, y: bullet.position.y - BULLET_HEIGHT / 2 - halfHeight },
-        { x: bullet.position.x - BULLET_WIDTH / 2 + 60 + halfWidth, y: bullet.position.y - BULLET_HEIGHT / 2 - halfHeight },
-        { x: bullet.position.x - BULLET_WIDTH / 2 + 60 + halfWidth, y: bullet.position.y - BULLET_HEIGHT / 2 + halfHeight },
-        { x: bullet.position.x - BULLET_WIDTH / 2 + 60 - halfWidth, y: bullet.position.y - BULLET_HEIGHT / 2 + halfHeight },
-    ];
-    return corners.map(point => rotatePoint(bullet.position.x, bullet.position.y, bullet.rotateDegree, point));
-}
-
-
-// Hàm xoay điểm quanh một tâm
-function rotatePoint(centerX, centerY, angle, point) {
-    const sinAngle = Math.sin(angle);
-    const cosAngle = Math.cos(angle);
-    point.x -= centerX;
-    point.y -= centerY;
-    const xNew = point.x * cosAngle - point.y * sinAngle;
-    const yNew = point.x * sinAngle + point.y * cosAngle;
-    point.x = xNew + centerX;
-    point.y = yNew + centerY;
-    return point;
-}
-
-// Hàm kiểm tra điểm nằm trong hình tròn
-function pointInCircle(point, player) {
-    const dx = point.x - player.position.x;
-    const dy = point.y - player.position.y;
-    return dx * dx + dy * dy <= PLAYER_SIZE * PLAYER_SIZE;
-}
-
-
 function updateBulletPosition() {
     for (let i = bullets.length - 1; i >= 0; i--) {
         if (
@@ -217,6 +175,10 @@ function updateBulletPosition() {
         }
     }
 }
+
+
+
+
 
 function deletePlayer(id) {
     colors.push(players[id].color)
