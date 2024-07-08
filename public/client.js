@@ -16,6 +16,7 @@ socket.on('connect', () => {
         x: GAME_SIZE / 2,
         y: GAME_SIZE / 2,
     }
+    var corners = []
     var animationId
     var id = socket.id
 
@@ -44,6 +45,12 @@ socket.on('connect', () => {
         animationId = requestAnimationFrame(animate)
 
         myGame.render()
+        corners.forEach(e => {
+            e.forEach(a => {
+                myGame.ctx.fillStyle = 'white'
+                myGame.ctx.fillRect(a.x, a.y, 10, 10)
+            })
+        })
         renderBullets()
         renderPlayers()
     }
@@ -157,6 +164,10 @@ socket.on('connect', () => {
             })
             frontendBullets.push(frontendBullet)
         })
+    })
+    socket.on('sendCorner', (corner) => {
+        corners = corner
+        
     })
 
     animate()
