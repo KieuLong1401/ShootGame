@@ -39,7 +39,7 @@ class Game {
         const polygonAngle = 2 * Math.PI / POLYGONAL_TYPE;
         const rowSpacing = (POLYGON_RADIUS * Math.sin(polygonAngle));
         const colSpacing = POLYGON_RADIUS * (1 + Math.cos(polygonAngle));
-        const numRows = Math.ceil(height / rowSpacing) + 1;
+        const numRows = (Math.ceil(height / rowSpacing) + 1) * 2;
         const numCols = Math.ceil(width / colSpacing) + 1;
         const polygonWidth = POLYGON_RADIUS * 2
         
@@ -47,19 +47,6 @@ class Game {
             x: -this.basePosition.x,
             y: -this.basePosition.y,
         }
-
-        // while(polygonPosition.y + rowSpacing < height + polygonWidth) {
-        //     polygonPosition.x = -this.basePosition.x
-        //     for (let polygonIndex = 0; polygonPosition.x + colSpacing < width + polygonWidth; polygonIndex++) {
-        //         this.drawPolygon(polygonPosition, polygonAngle)
-                
-        //         polygonPosition.x += colSpacing
-        //         polygonPosition.y += (-1) ** polygonIndex * rowSpacing
-        //     }
-            
-        //     polygonPosition.y += rowSpacing * 2
-        // }
-  
 
         for (let rowIndex = 0; rowIndex < numRows; rowIndex++) {
             polygonPosition.x = -this.basePosition.x
@@ -70,7 +57,7 @@ class Game {
                 polygonPosition.y += (-1) ** polygonIndex * rowSpacing
             }
             
-            polygonPosition.y += rowSpacing * 2
+            polygonPosition.y = -this.basePosition.y + rowSpacing * rowIndex * 2
         }
     }
     render() {
@@ -80,15 +67,6 @@ class Game {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
 
         this.renderPolygonGridBackground(this.canvas.width, this.canvas.height)
-
-        // this.drawPolygon({
-        //     x: this.basePosition.x,
-        //     y: this.basePosition.y,
-        // }, 2 * Math.PI / POLYGONAL_TYPE)
-        // this.drawPolygon({
-        //     x: this.basePosition.x,
-        //     y: this.basePosition.y + POLYGON_RADIUS * Math.sin(2 * Math.PI / POLYGONAL_TYPE) * 2,
-        // }, 2 * Math.PI / POLYGONAL_TYPE)
 
         this.ctx.strokeStyle = 'darkturquoise'
         this.ctx.lineWidth = 5
