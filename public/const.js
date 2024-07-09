@@ -12,3 +12,5 @@ export const BULLET_SPEED = 15
 export const BULLET_WIDTH = 20
 export const BULLET_HEIGHT = 10
 export const MAX_PLAYER = 2
+export const POLYGON_RADIUS = 100
+export const POLYGONAL_TYPE = 6

@@ -1,7 +1,7 @@
 import Player from './classes/Player.js'
 import Game from './classes/Game.js'
 import Bullet from './classes/Bullet.js'
-import { MAX_PLAYER } from './const.js'
+import { GAME_SIZE, MAX_PLAYER } from './const.js'
 
 const socket = io()
 socket.on('connect', () => {
@@ -58,6 +58,11 @@ socket.on('connect', () => {
 
             menu.classList.add('hide')
         } else {
+            myGame.basePosition = {
+                x: GAME_SIZE / 2,
+                y: GAME_SIZE / 2,
+            }
+
             menu.classList.remove('hide')
         }
 
