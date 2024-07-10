@@ -43,33 +43,31 @@ class Game {
         const colSpacing = POLYGON_RADIUS * (1 + Math.cos(polygonAngle));
 
         const cameraPosition = {
-            x: this.canvas.width / 2 - this.basePosition.x,
-            y: this.canvas.height / 2 - this.basePosition.y
+            x: this.basePosition.x - this.canvas.width / 2,
+            y: this.basePosition.y - this.canvas.height / 2
         }
 
-        const endRow = Math.ceil((this.basePosition.y + this.canvas.height) / (rowSpacing * 2)) + 1;
-        const endCol = Math.ceil((this.basePosition.x + this.canvas.width) / colSpacing) + 1;
-        const startCol = Math.ceil((0 - cameraPosition.x) / colSpacing)
-        const startRow = Math.ceil((0 - cameraPosition.y) / rowSpacing)
+        const startCol = Math.ceil(cameraPosition.x / colSpacing)
+        const startRow = Math.ceil(cameraPosition.y / rowSpacing)
+        const endCol = Math.ceil((cameraPosition.x + this.canvas.width) / colSpacing) + 1;
+        const endRow = Math.ceil((cameraPosition.y + this.canvas.height ) / (rowSpacing * 2)) + 1;
+
+        const initialX = this.canvas.width / 2 - this.basePosition.x
+        const initialY = this.canvas.height / 2 - this.basePosition.y
 
         let polygonPosition = {
-            x: -this.basePosition.x,
-            y: -this.basePosition.y,
+            x: initialX,
+            y: initialY,
         }
 
         for (var rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-            polygonPosition.x = -this.basePosition.x
-            
             for (var colIndex = startCol; colIndex < endCol; colIndex++) {
-                this.drawPolygon(polygonPosition, polygonAngle)
+                polygonPosition.x = initialX + colSpacing * colIndex
+                polygonPosition.y = initialY + rowIndex * rowSpacing * 2 - (colIndex % 2) * rowSpacing
                 
-                polygonPosition.x = -this.basePosition.x + colSpacing * (colIndex + 1)
-                polygonPosition.y += (-1) ** colIndex * rowSpacing
+                this.drawPolygon(polygonPosition, polygonAngle)
             }
-            
-            polygonPosition.y = -this.basePosition.y + rowIndex * rowSpacing * 2
         }
-        // console.log((-1) ** 3 * rowSpacing, -(3 % 2) * rowSpacing)
     }
 
     render() {

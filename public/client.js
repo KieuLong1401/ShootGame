@@ -140,8 +140,8 @@ socket.on('connect', () => {
         socket.emit('shoot', player.gunRotateDegree)
     })
     window.addEventListener('resize', () => {
-        let scaleRate = (window.innerWidth + window.innerHeight) / CAMERA_BASE_WIDTH
-        myGame.scaleRate = (window.innerWidth + window.innerHeight) / CAMERA_BASE_WIDTH
+        let scaleRate = window.innerWidth / CAMERA_BASE_WIDTH
+        myGame.scaleRate = scaleRate
         myGame.canvas.width = window.innerWidth
         myGame.canvas.height = window.innerHeight
     })
