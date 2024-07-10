@@ -1,4 +1,4 @@
-import { GAME_SIZE, POLYGONAL_TYPE, POLYGON_RADIUS } from '../const.js'
+import { CAMERA_BASE_WIDTH, GAME_SIZE, POLYGONAL_TYPE, POLYGON_RADIUS } from '../const.js'
 
 class Game {
     constructor(canvas) {
@@ -11,6 +11,7 @@ class Game {
 
         this.canvas.width = window.innerWidth
         this.canvas.height = window.innerHeight
+        this.scaleRate = (window.innerWidth + window.innerHeight) / CAMERA_BASE_WIDTH
     }
 
     clearScreen() {
@@ -33,43 +34,54 @@ class Game {
         
         this.ctx.closePath();
         this.ctx.strokeStyle = 'gray'
+        this.ctx.lineWidth = 10
         this.ctx.stroke();
     }
-    renderPolygonGridBackground(width, height) {
+    renderPolygonGridBackground() {
         const polygonAngle = 2 * Math.PI / POLYGONAL_TYPE;
         const rowSpacing = (POLYGON_RADIUS * Math.sin(polygonAngle));
         const colSpacing = POLYGON_RADIUS * (1 + Math.cos(polygonAngle));
-        const numRows = (Math.ceil(height / rowSpacing) + 1) * 2;
-        const numCols = Math.ceil(width / colSpacing) + 1;
-        const polygonWidth = POLYGON_RADIUS * 2
-        
+
+        const cameraPosition = {
+            x: this.canvas.width / 2 - this.basePosition.x,
+            y: this.canvas.height / 2 - this.basePosition.y
+        }
+
+        const endRow = Math.ceil((this.basePosition.y + this.canvas.height) / (rowSpacing * 2)) + 1;
+        const endCol = Math.ceil((this.basePosition.x + this.canvas.width) / colSpacing) + 1;
+        const startCol = Math.ceil((0 - cameraPosition.x) / colSpacing)
+        const startRow = Math.ceil((0 - cameraPosition.y) / rowSpacing)
+
         let polygonPosition = {
             x: -this.basePosition.x,
             y: -this.basePosition.y,
         }
 
-        for (let rowIndex = 0; rowIndex < numRows; rowIndex++) {
+        for (var rowIndex = startRow; rowIndex < endRow; rowIndex++) {
             polygonPosition.x = -this.basePosition.x
-            for (let polygonIndex = 0; polygonPosition.x + colSpacing < width + polygonWidth; polygonIndex++) {
+            
+            for (var colIndex = startCol; colIndex < endCol; colIndex++) {
                 this.drawPolygon(polygonPosition, polygonAngle)
                 
-                polygonPosition.x += colSpacing
-                polygonPosition.y += (-1) ** polygonIndex * rowSpacing
+                polygonPosition.x = -this.basePosition.x + colSpacing * (colIndex + 1)
+                polygonPosition.y += (-1) ** colIndex * rowSpacing
             }
             
-            polygonPosition.y = -this.basePosition.y + rowSpacing * rowIndex * 2
+            polygonPosition.y = -this.basePosition.y + rowIndex * rowSpacing * 2
         }
+        // console.log((-1) ** 3 * rowSpacing, -(3 % 2) * rowSpacing)
     }
+
     render() {
         this.clearScreen()
 
         this.ctx.fillStyle = 'black'
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
 
-        this.renderPolygonGridBackground(this.canvas.width, this.canvas.height)
+        this.renderPolygonGridBackground()
 
         this.ctx.strokeStyle = 'darkturquoise'
-        this.ctx.lineWidth = 5
+        this.ctx.lineWidth = 10
         this.ctx.strokeRect(
             this.canvas.width / 2 - this.basePosition.x,
             this.canvas.height / 2 - this.basePosition.y,
