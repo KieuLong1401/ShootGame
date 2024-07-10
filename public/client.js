@@ -7,8 +7,9 @@ const socket = io()
 socket.on('connect', () => {
     const menu = document.querySelector('#menu')
     const joinBtn = document.querySelector('#joinBtn')
-    const canvas = document.querySelector('#canvas')
     const errorText = document.querySelector('#errorText')
+    const canvas = document.querySelector('#canvas')
+    const map = document.querySelector('#map')
 
     const myGame = new Game(canvas)
 
@@ -29,22 +30,8 @@ socket.on('connect', () => {
                 myGame.canvas.height / 2),
         }
     }
-
-    function renderPlayers() {
-        Object.keys(frontendPlayers).forEach((id) => {
-            const player = frontendPlayers[id]
-            player.render(myGame.ctx, myGame.scaleRate)
-        })
-    }
-    function renderBullets() {
-        frontendBullets.forEach((bullet) => {
-            bullet.render(myGame.ctx)
-        })
-    }
     function animate() { 
-        myGame.render()
-        renderBullets()
-        renderPlayers()
+        myGame.render(frontendPlayers, frontendBullets)
     }
 
     function updatePlayers(backendPlayers) {

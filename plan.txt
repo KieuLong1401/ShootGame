@@ -1,0 +1,45 @@
+Basic Idea:
+    - Web platform's online shooting tank game.
+
+Features:
+    - Play online.
+    - Player based camera.
+    - Mini map.
+    - Tank:
+        + Movement.
+        + Shoot.
+        + Die.
+        + Kill.
+        + Limit bullet range.
+        + Delay shot.
+        + Get random color.
+    - Set user name.
+    - Hexagon grid background.
+    - Map limit.
+
+Schedule:
+    - 3/7:
+        + Initial set up.
+        + Socket.io set up.
+        + Basic map, tank animate.
+    - 4/7:
+        + Tank's movement.
+    - 5/7:
+        + Set up constant file.
+        + Draw and rotate tank's gun.
+        + Tank's shoot.
+    - 6/7 -> 7/7:
+        + Update tank's shoot.
+        + Character based camera.
+        + Disable user's window scale behave. (Can cause some bug).
+    - 8/7:
+        + Update tank's shoot.
+        + Bullet collision.
+        + Set up for server's upload.
+        + Restructure, clean code.
+    - 9/7:
+        + Hexagon grid background.
+    - 10/7: 
+        + Optimize background.
+        + Delay shoot.
+        + Limit bullet range.

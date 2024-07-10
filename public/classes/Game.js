@@ -17,6 +17,11 @@ class Game {
     clearScreen() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     }
+    renderBackgroundColor() {
+        this.ctx.fillStyle = 'black'
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+    }
+
     drawPolygon(position, polygonAngle) {
         this.ctx.beginPath();
         
@@ -39,6 +44,7 @@ class Game {
     }
     renderPolygonGridBackground() {
         const polygonAngle = 2 * Math.PI / POLYGONAL_TYPE;
+
         const rowSpacing = (POLYGON_RADIUS * Math.sin(polygonAngle));
         const colSpacing = POLYGON_RADIUS * (1 + Math.cos(polygonAngle));
 
@@ -47,8 +53,8 @@ class Game {
             y: this.basePosition.y - this.canvas.height / 2
         }
 
-        const startCol = Math.ceil(cameraPosition.x / colSpacing)
-        const startRow = Math.ceil(cameraPosition.y / rowSpacing)
+        const startCol = Math.ceil(cameraPosition.x / colSpacing) - 1
+        const startRow = Math.ceil(cameraPosition.y / rowSpacing / 2) - 1
         const endCol = Math.ceil((cameraPosition.x + this.canvas.width) / colSpacing) + 1;
         const endRow = Math.ceil((cameraPosition.y + this.canvas.height ) / (rowSpacing * 2)) + 1;
 
@@ -60,24 +66,29 @@ class Game {
             y: initialY,
         }
 
-        for (var rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-            for (var colIndex = startCol; colIndex < endCol; colIndex++) {
-                polygonPosition.x = initialX + colSpacing * colIndex
-                polygonPosition.y = initialY + rowIndex * rowSpacing * 2 - (colIndex % 2) * rowSpacing
+        for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
+            for (let colIndex = startCol; colIndex < endCol; colIndex++) {
+                polygonPosition.x = initialX + (colIndex * colSpacing)
+                polygonPosition.y = initialY + (rowIndex * rowSpacing * 2) - (Math.abs(colIndex % 2) * rowSpacing)
                 
                 this.drawPolygon(polygonPosition, polygonAngle)
             }
         }
     }
 
-    render() {
-        this.clearScreen()
+    renderPlayers(players) {
+        Object.keys(players).forEach((id) => {
+            const player = players[id]
+            player.render(this.ctx, this.scaleRate)
+        })
+    }
+    renderBullets(bullets) {
+        bullets.forEach((bullet) => {
+            bullet.render(this.ctx)
+        })
+    }
 
-        this.ctx.fillStyle = 'black'
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
-
-        this.renderPolygonGridBackground()
-
+    renderGameBorder() {
         this.ctx.strokeStyle = 'darkturquoise'
         this.ctx.lineWidth = 10
         this.ctx.strokeRect(
@@ -86,6 +97,15 @@ class Game {
             GAME_SIZE,
             GAME_SIZE
         )
+    }
+
+    render(players, bullets) {
+        this.clearScreen()
+        this.renderBackgroundColor()
+        this.renderPolygonGridBackground()
+        this.renderPlayers(players)
+        this.renderBullets(bullets)
+        this.renderGameBorder()
     }
 }
 

@@ -9,6 +9,8 @@ import {
     BULLET_SPEED,
     BULLET_WIDTH,
     BULLET_HEIGHT,
+    SHOOT_DELAY,
+    BULLET_RANGE_LIMIT,
 } from './public/const.js'
 import path from 'path'
 
@@ -66,6 +68,12 @@ function getRotatedPoint(center, rotateAngle, point) {
     point.y = yNew + center.y;
 
     return point;
+}
+function getDistance(positionA, positionB) {
+    let distanceX = positionA.x - positionB.x;
+    let distanceY = positionA.y - positionB.y;
+
+    return Math.sqrt(distanceX ** 2 + distanceY ** 2)
 }
 
 function emitData() {
@@ -149,10 +157,14 @@ function updateBulletPosition() {
         let bullet = backendBullets[bulletIndex]
 
         if (
-            bullet.position.x < 0 ||
-            bullet.position.y < 0 ||
-            bullet.position.x > GAME_SIZE ||
-            bullet.position.y > GAME_SIZE
+            (
+                bullet.position.x < 0 ||
+                bullet.position.y < 0 ||
+                bullet.position.x > GAME_SIZE ||
+                bullet.position.y > GAME_SIZE
+            ) 
+            || 
+            getDistance(bullet.firstPosition, bullet.position) > BULLET_RANGE_LIMIT
         ) {
             deleteBullet(bulletIndex)
         } else {
@@ -207,6 +219,7 @@ io.on('connection', (socket) => {
             point: 0,
             name,
             gunRotateDegree: 0,
+            lastShotTime: new Date().getTime() - SHOOT_DELAY
         }
         directions[id] = new Set()
     })
@@ -257,21 +270,26 @@ io.on('connection', (socket) => {
         backendPlayers[id].gunRotateDegree = gunRotateDegree
     })
     socket.on('shoot', (gunRotateDegree) => {
-        if (!backendPlayers[id]) return
+        let shotPlayer = backendPlayers[id]
+        let currentTime = new Date().getTime()
 
-        backendBullets.push({
-            id,
-            position: { 
-                x: backendPlayers[id].position.x,
-                y: backendPlayers[id].position.y,
-            },
-            velocity: {
-                x: Math.cos(gunRotateDegree) * BULLET_SPEED,
-                y: Math.sin(gunRotateDegree) * BULLET_SPEED,
-            },
-            rotateDegree: gunRotateDegree,
-            color: backendPlayers[id].color,
-        })
+        if (!shotPlayer) return
+
+        if(currentTime - shotPlayer.lastShotTime >= SHOOT_DELAY) {
+            backendBullets.push({
+                id,
+                firstPosition: { ...shotPlayer.position },
+                position: { ...shotPlayer.position },
+                velocity: {
+                    x: Math.cos(gunRotateDegree) * BULLET_SPEED,
+                    y: Math.sin(gunRotateDegree) * BULLET_SPEED,
+                },
+                rotateDegree: gunRotateDegree,
+                color: shotPlayer.color,
+            })
+            shotPlayer.lastShotTime = currentTime
+        }
+
     })
 })
 

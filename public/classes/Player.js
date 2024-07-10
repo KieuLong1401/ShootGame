@@ -37,14 +37,17 @@ class Player {
         ctx.setTransform(1, 0, 0, 1, 0, 0)
     }
     renderName(ctx) {
-        const fontSize = 15 + (this.point / 100) * 4
+        const fontSize = 20 + (this.point / 100) * 4
         const spaceFromBodyToName = 15 + this.point / 100
 
         ctx.font = `900 ${fontSize}px Arial`
+
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
+
         ctx.fillStyle = 'white'
         ctx.strokeStyle = 'black'
+        ctx.lineWidth = 4
 
         ctx.strokeText(
             this.name,
