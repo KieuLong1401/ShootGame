@@ -14,3 +14,4 @@ export const BULLET_HEIGHT = 10
 export const MAX_PLAYER = 2
 export const POLYGON_RADIUS = 100
 export const POLYGONAL_TYPE = 6
+export const CAMERA_BASE_WIDTH = 3000

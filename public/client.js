@@ -1,7 +1,7 @@
 import Player from './classes/Player.js'
 import Game from './classes/Game.js'
 import Bullet from './classes/Bullet.js'
-import { GAME_SIZE, MAX_PLAYER } from './const.js'
+import { CAMERA_BASE_WIDTH, GAME_SIZE, MAX_PLAYER } from './const.js'
 
 const socket = io()
 socket.on('connect', () => {
@@ -20,20 +20,20 @@ socket.on('connect', () => {
     function getPositionInCamera(position) {
         return {
             x:
-                position.x -
+                (position.x -
                 myGame.basePosition.x +
-                myGame.canvas.width / 2,
+                myGame.canvas.width / 2),
             y:
-                position.y -
+                (position.y -
                 myGame.basePosition.y +
-                myGame.canvas.height / 2,
+                myGame.canvas.height / 2),
         }
     }
 
     function renderPlayers() {
         Object.keys(frontendPlayers).forEach((id) => {
             const player = frontendPlayers[id]
-            player.render(myGame.ctx)
+            player.render(myGame.ctx, myGame.scaleRate)
         })
     }
     function renderBullets() {
@@ -140,6 +140,8 @@ socket.on('connect', () => {
         socket.emit('shoot', player.gunRotateDegree)
     })
     window.addEventListener('resize', () => {
+        let scaleRate = (window.innerWidth + window.innerHeight) / CAMERA_BASE_WIDTH
+        myGame.scaleRate = (window.innerWidth + window.innerHeight) / CAMERA_BASE_WIDTH
         myGame.canvas.width = window.innerWidth
         myGame.canvas.height = window.innerHeight
     })

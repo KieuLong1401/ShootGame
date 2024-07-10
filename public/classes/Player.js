@@ -19,10 +19,10 @@ class Player {
         this.renderName(ctx)
     }
     renderBody(ctx) {
-        this.size = PLAYER_SIZE + this.point / 10
+        this.size = PLAYER_SIZE 
 
         ctx.beginPath()
-        ctx.arc(this.position.x, this.position.y, this.size, 0, 2 * Math.PI)
+        ctx.arc(this.position.x, this.position.y, this.size , 0, 2 * Math.PI)
         ctx.fillStyle = this.color
         ctx.fill()
     }
