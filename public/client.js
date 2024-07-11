@@ -12,6 +12,8 @@ socket.on('connect', () => {
     const errorText = document.querySelector('#errorText')
     const canvas = document.querySelector('#canvas')
     const announceContainer = document.querySelector('.announceContainer')
+    const leaderBoardMain = document.querySelector('.main')
+
     const myGame = new Game(canvas)
 
     var frontendPlayers = {}
@@ -66,8 +68,10 @@ socket.on('connect', () => {
         }
     }
 
-    function animate() { 
+    function animate() {
         myGame.render(frontendPlayers, frontendBullets)
+        updateLeaderBoard(frontendPlayers)
+
         if(!frontendPlayers[id]) return
         myGame.renderMap(frontendPlayers)
     }
@@ -116,6 +120,36 @@ socket.on('connect', () => {
                 position: getPositionInCamera(bullet.position),
             })
             frontendBullets.push(frontendBullet)
+        })
+    }
+    function updateLeaderBoard(players) {
+        let sortedPlayer = Object.keys(players).sort((idA, idB) => players[idB].kill - players[idA].kill )
+
+        leaderBoardMain.innerHTML = null
+        leaderBoardMain.style.border = 'none'
+        
+        sortedPlayer.forEach((playerId, playerRank) => {
+            let player = players[playerId]
+            
+            let container = document.createElement('div')
+            container.classList.add('player')
+            if(playerId ==  id) {
+                container.style.color = 'yellow'
+            }
+            
+            let rank = document.createElement('span')
+            rank.classList.add('rank')
+            rank.innerText = `${playerRank + 1}. ${player.name}`
+            
+            let kill = document.createElement('span')
+            kill.classList.add('kill')
+            kill.innerText = player.kill.toString()
+            
+            container.insertAdjacentElement('beforeend', rank)
+            container.insertAdjacentElement('beforeend', kill)
+            
+            leaderBoardMain.insertAdjacentElement('beforeend', container)
+            leaderBoardMain.style.border = '2px gray solid'
         })
     }
 
@@ -180,6 +214,7 @@ socket.on('connect', () => {
         },
         { passive: false }
     )
+    document.addEventListener('contextmenu', event => event.preventDefault());
 
     myGame.canvas.addEventListener('mousemove', (event) => {
         let player = frontendPlayers[id]

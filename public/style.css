@@ -3,12 +3,16 @@
     padding: 0;
     margin: 0;
 }
+*:hover {
+    cursor:default;
+}
 body {
     width: 100vw;
     height: 100vh;
     margin: 0;
     overflow: hidden;
     position: relative;
+    user-select: none;
 }
 canvas {
     position: absolute;
@@ -87,14 +91,10 @@ canvas {
     flex-direction: column;
     z-index: 99;
     background-color: rgba(0, 0, 0, 0.75);
-    border: 2px gray solid;
     color: white;
 }
-.main, .currentPlayer {
-    width: 100%;
-}
 .main {
-    border-bottom: 2px gray solid;
+    width: 100%;
 }
 .player {
     min-width: 100%;

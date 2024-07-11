@@ -11,6 +11,10 @@ import {
     BULLET_HEIGHT,
     SHOOT_DELAY,
     BULLET_RANGE_LIMIT,
+    PLAYER_HP,
+    BULLET_DAMAGE,
+    HEAL_AFTER_GET_HIT,
+    HEAL_AMOUNT,
 } from './public/const.js'
 import path from 'path'
 
@@ -107,7 +111,16 @@ function pointInCircle(position, player) {
     return distanceX * distanceX + distanceY * distanceY <= PLAYER_SIZE * PLAYER_SIZE;
 }
 
-function updatePlayerPosition() {
+function updatePlayer() {
+    Object.keys(backendPlayers).forEach(playerId => {
+        if(backendPlayers[playerId].lastGetHitTime < new Date().getTime() - HEAL_AFTER_GET_HIT) {
+            if(backendPlayers[playerId].hp + HEAL_AMOUNT <= PLAYER_HP) {
+                backendPlayers[playerId].hp += HEAL_AMOUNT
+            } else {
+                backendPlayers[playerId].hp = PLAYER_HP
+            }
+        }
+    })
     Object.keys(directions).forEach((id) => {
         if (!backendPlayers[id]) return
 
@@ -152,7 +165,7 @@ function updatePlayerPosition() {
         backendPlayers[id].position = updatedPosition
     })
 }
-function updateBulletPosition() {
+function updateBullet() {
     for (let bulletIndex = backendBullets.length - 1; bulletIndex >= 0; bulletIndex--) {
         let bullet = backendBullets[bulletIndex]
 
@@ -179,10 +192,18 @@ function updateBulletPosition() {
                     ) &&
                     bullet.id != playerId
                 ) {
-                    io.emit('kill', {killedPlayer: backendPlayers[bullet.id], beKilledPlayer: backendPlayers[playerId]})
-                    deleteBullet(bulletIndex)
-                    deletePlayer(playerId)
+                    if(backendPlayers[playerId].hp - BULLET_DAMAGE > 0) {
+                        backendPlayers[playerId].hp -= BULLET_DAMAGE
+                        backendPlayers[playerId].lastGetHitTime = new Date().getTime()
+                        deleteBullet(bulletIndex)
+                    } else {
+                        backendPlayers[bullet.id].kill += 1
+                        io.emit('kill', {killedPlayer: backendPlayers[bullet.id], beKilledPlayer: backendPlayers[playerId]})
+                        deleteBullet(bulletIndex)
+                        deletePlayer(playerId)
+                    }
                     return
+
                 }
             }
         }
@@ -217,10 +238,12 @@ io.on('connection', (socket) => {
         backendPlayers[id] = {
             position: getRandomPosition(),
             color: getRandomColor(),
-            point: 0,
+            kill: 0,
+            hp: PLAYER_HP,
             name,
             gunRotateDegree: 0,
-            lastShotTime: new Date().getTime() - SHOOT_DELAY
+            lastShotTime: new Date().getTime() - SHOOT_DELAY,
+            lastGetHitTime: new Date().getTime() - HEAL_AFTER_GET_HIT
         }
         directions[id] = new Set()
     })
@@ -295,8 +318,8 @@ io.on('connection', (socket) => {
 })
 
 setInterval(() => {
-    updatePlayerPosition()
-    updateBulletPosition()
+    updatePlayer()
+    updateBullet()
     emitData()
 }, 33)
 

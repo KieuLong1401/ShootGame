@@ -8,15 +8,17 @@ class Player {
             y: player.positionOnCamera.y,
         }
         this.color = player.color
-        this.point = player.point
+        this.kill = player.kill
         this.name = player.name
         this.gunRotateDegree = player.gunRotateDegree
         this.size = PLAYER_SIZE
+        this.hp = player.hp
     }
 
     render(ctx) {
         this.renderBody(ctx)
         this.renderGun(ctx)
+        this.renderHP(ctx)
         this.renderName(ctx)
     }
     renderOnMap(ctx) {
@@ -44,9 +46,17 @@ class Player {
         ctx.fillRect(this.size - 5, -gunHeight / 2, gunWidth, gunHeight)
         ctx.setTransform(1, 0, 0, 1, 0, 0)
     }
+    renderHP(ctx) {
+        ctx.fillStyle = 'gray'
+        ctx.fillRect(this.positionOnCamera.x - 100 / 2, this.positionOnCamera.y - 60, this.hp, 10)
+        ctx.strokeStyle = 'white'
+        ctx.lineWidth = 1
+        ctx.strokeRect(this.positionOnCamera.x - 100 / 2, this.positionOnCamera.y - 60, 100, 10)
+        
+    }
     renderName(ctx) {
-        const fontSize = 20 + (this.point / 100) * 4
-        const spaceFromBodyToName = 15 + this.point / 100
+        const fontSize = 20 
+        const spaceFromBodyToName = 15 
 
         ctx.font = `900 ${fontSize}px Arial`
 
