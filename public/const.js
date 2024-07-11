@@ -1,5 +1,6 @@
 export const PLAYER_SPEED = 10
-export const GAME_SIZE = 1000
+export const GAME_SIZE = 2000
+export const MINI_MAP_SIZE = 400
 export const CHAR_COLORS = [
     '#39FF14',
     '#FF6EC7',
@@ -15,5 +16,6 @@ export const MAX_PLAYER = 2
 export const POLYGON_RADIUS = 100
 export const POLYGONAL_TYPE = 6
 export const CAMERA_BASE_WIDTH = 3000
-export const SHOOT_DELAY = 700
-export const BULLET_RANGE_LIMIT = 700
+export const SHOOT_DELAY = 500
+export const BULLET_RANGE_LIMIT = 1000
+export const KILL_ANNOUNCE_TIMEOUT = 3000

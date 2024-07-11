@@ -4,10 +4,16 @@
     margin: 0;
 }
 body {
+    width: 100vw;
+    height: 100vh;
     margin: 0;
     overflow: hidden;
+    position: relative;
 }
 canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
 }
@@ -69,4 +75,38 @@ canvas {
 }
 .hide {
     display: none
+}
+
+.announceContainer {
+    height: fit-content;
+    width: fit-content;
+    padding: 20px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    row-gap: 5px;
+}
+.announce {
+    width: fit-content;
+    height: 50px;
+    padding-inline: 20px;
+    background-color: rgb(37, 37, 37);
+    border: 2px solid darkturquoise;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    column-gap: 20px;
+    z-index: 99;
+    font-weight: 900;
+    font-size: 25px;
+    text-shadow: black 1px 1px 3px;
+}
+.gunIcon {
+    width: 20px;
+    fill: white;
 }

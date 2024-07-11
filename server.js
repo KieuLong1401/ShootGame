@@ -179,6 +179,7 @@ function updateBulletPosition() {
                     ) &&
                     bullet.id != playerId
                 ) {
+                    io.emit('kill', {killedPlayer: backendPlayers[bullet.id], beKilledPlayer: backendPlayers[playerId]})
                     deleteBullet(bulletIndex)
                     deletePlayer(playerId)
                     return

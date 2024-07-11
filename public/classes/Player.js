@@ -1,16 +1,17 @@
-import { PLAYER_SIZE } from '../const.js'
+import { GAME_SIZE, MINI_MAP_SIZE, PLAYER_SIZE } from '../const.js'
 
 class Player {
     constructor(player) {
-        this.position = {
-            x: player.position.x,
-            y: player.position.y,
+        this.position = player.position
+        this.positionOnCamera = {
+            x: player.positionOnCamera.x,
+            y: player.positionOnCamera.y,
         }
         this.color = player.color
         this.point = player.point
         this.name = player.name
         this.gunRotateDegree = player.gunRotateDegree
-        this.size = PLAYER_SIZE + this.point / 10
+        this.size = PLAYER_SIZE
     }
 
     render(ctx) {
@@ -18,11 +19,18 @@ class Player {
         this.renderGun(ctx)
         this.renderName(ctx)
     }
-    renderBody(ctx) {
-        this.size = PLAYER_SIZE 
+    renderOnMap(ctx) {
+        let mapRatio = MINI_MAP_SIZE / GAME_SIZE
+        let size = this.size * mapRatio
 
         ctx.beginPath()
-        ctx.arc(this.position.x, this.position.y, this.size , 0, 2 * Math.PI)
+        ctx.arc(ctx.canvas.width - MINI_MAP_SIZE + this.position.x * mapRatio, ctx.canvas.height - MINI_MAP_SIZE + this.position.y * mapRatio, size , 0, 2 * Math.PI)
+        ctx.fillStyle = this.color
+        ctx.fill()
+    }
+    renderBody(ctx) {
+        ctx.beginPath()
+        ctx.arc(this.positionOnCamera.x, this.positionOnCamera.y, this.size , 0, 2 * Math.PI)
         ctx.fillStyle = this.color
         ctx.fill()
     }
@@ -30,7 +38,7 @@ class Player {
         const gunWidth = 30
         const gunHeight = 20
 
-        ctx.setTransform(1, 0, 0, 1, this.position.x, this.position.y)
+        ctx.setTransform(1, 0, 0, 1, this.positionOnCamera.x, this.positionOnCamera.y)
         ctx.rotate(this.gunRotateDegree)
 
         ctx.fillRect(this.size - 5, -gunHeight / 2, gunWidth, gunHeight)
@@ -51,13 +59,13 @@ class Player {
 
         ctx.strokeText(
             this.name,
-            this.position.x,
-            this.position.y + this.size + spaceFromBodyToName
+            this.positionOnCamera.x,
+            this.positionOnCamera.y + this.size + spaceFromBodyToName
         )
         ctx.fillText(
             this.name,
-            this.position.x,
-            this.position.y + this.size + spaceFromBodyToName
+            this.positionOnCamera.x,
+            this.positionOnCamera.y + this.size + spaceFromBodyToName
         )
     }
 }

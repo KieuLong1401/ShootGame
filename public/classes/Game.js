@@ -1,4 +1,4 @@
-import { CAMERA_BASE_WIDTH, GAME_SIZE, POLYGONAL_TYPE, POLYGON_RADIUS } from '../const.js'
+import { CAMERA_BASE_WIDTH, GAME_SIZE, MINI_MAP_SIZE, POLYGONAL_TYPE, POLYGON_RADIUS } from '../const.js'
 
 class Game {
     constructor(canvas) {
@@ -79,7 +79,7 @@ class Game {
     renderPlayers(players) {
         Object.keys(players).forEach((id) => {
             const player = players[id]
-            player.render(this.ctx, this.scaleRate)
+            player.render(this.ctx)
         })
     }
     renderBullets(bullets) {
@@ -98,6 +98,21 @@ class Game {
             GAME_SIZE
         )
     }
+    renderMap(players) {
+        let mapRatio = MINI_MAP_SIZE / GAME_SIZE
+
+        this.ctx.fillStyle = 'black'
+        this.ctx.fillRect(this.canvas.width - MINI_MAP_SIZE, this.canvas.height - MINI_MAP_SIZE, MINI_MAP_SIZE, MINI_MAP_SIZE)
+
+        Object.keys(players).forEach((id) => {
+            const player = players[id]
+            player.renderOnMap(this.ctx)
+        })
+
+        this.ctx.strokeStyle = 'darkturquoise'
+        this.ctx.lineWidth = 5
+        this.ctx.strokeRect(this.canvas.width - MINI_MAP_SIZE, this.canvas.height - MINI_MAP_SIZE, MINI_MAP_SIZE, MINI_MAP_SIZE)
+    }
 
     render(players, bullets) {
         this.clearScreen()
@@ -106,6 +121,7 @@ class Game {
         this.renderPlayers(players)
         this.renderBullets(bullets)
         this.renderGameBorder()
+        this.renderMap(players)
     }
 }
 
