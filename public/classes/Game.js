@@ -121,7 +121,6 @@ class Game {
         this.renderPlayers(players)
         this.renderBullets(bullets)
         this.renderGameBorder()
-        this.renderMap(players)
     }
 }
 

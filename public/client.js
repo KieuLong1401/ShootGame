@@ -68,6 +68,8 @@ socket.on('connect', () => {
 
     function animate() { 
         myGame.render(frontendPlayers, frontendBullets)
+        if(!frontendPlayers[id]) return
+        myGame.renderMap(frontendPlayers)
     }
 
     function updatePlayers(backendPlayers) {
