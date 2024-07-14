@@ -43,3 +43,14 @@ Schedule:
         + Optimize background.
         + Delay shoot.
         + Limit bullet range.
+    - 11/7:
+        + Mini map.
+        + Kill announce.
+        + Leader board.
+        + Health point.
+        + Heal.
+    - 12/7:
+        + Loading screen.
+        + Rotate device announce for mobile.
+    - 13/7 - 14/4:
+        + joystick for mobile player.

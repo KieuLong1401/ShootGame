@@ -31,6 +31,7 @@ canvas {
     left: 50%;
     transform: translate(-50%, -50%);
     overflow: hidden;
+    z-index: 99;
 }
 .background {
     width: 100%;
@@ -77,16 +78,13 @@ canvas {
     height: 30px;
     border-radius: 16px;
 }
-.hide {
-    display: none
-}
 
 .leaderBoard {
     height: fit-content;
     width: 200px;
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     display: flex;
     flex-direction: column;
     z-index: 99;
@@ -113,31 +111,185 @@ canvas {
     width: fit-content;
     padding: 20px;
     position: absolute;
-    top: 0;
-    right: 0;
+    bottom: 75%;
+    left: 50%;
+    transform: translate(-50%, 0);
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    row-gap: 5px;
+    justify-content: flex-end;
+    align-items: center;
+    row-gap: 10px;
     z-index: 99;
 }
 .announce {
     width: fit-content;
-    height: 50px;
+    padding-top: 5px;
+    padding-bottom: 5px;
     padding-inline: 20px;
-    background-color: rgb(37, 37, 37);
-    border: 2px solid darkturquoise;
+    background-color: rgba(0, 0, 0, 0.75);
+    border: 1px solid darkturquoise;
     border-radius: 4px;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    column-gap: 20px;
+    column-gap: 30px;
     font-weight: 900;
     font-size: 25px;
     text-shadow: black 1px 1px 3px;
 }
 .gunIcon {
     width: 20px;
-    fill: white;
+    fill: rgb(255, 0, 0);
 }
+
+.loading {
+    background-color: black;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.spinner {
+    color: darkturquoise
+}
+.spinner {
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+}
+.spinner:after {
+    content: " ";
+    display: block;
+    width: 64px;
+    height: 64px;
+    margin: 8px;
+    border-radius: 50%;
+    border: 6.4px solid currentColor;
+    border-color: currentColor transparent currentColor transparent;
+    animation: spinner 1.2s linear infinite;
+}
+@keyframes spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.rotateDeviceAnnounce {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+    z-index: 100;
+position: absolute;
+top: 0;
+left: 0;
+}
+:root{
+    --phone-color: #2a2a2a;
+    --phone-height: 40vw;
+    --phone-width: 20vw;
+}
+.arrow-wrap {
+    animation: up-down ease-in-out forwards infinite 1s;
+    transform: translate(20vw, -20vw);
+}
+
+.arrow-circle{
+    overflow: hidden;
+    position: absolute;
+    height: 10vw;
+    width: 15vw;
+}
+
+.arrow-circle .arrow{
+    position: relative;
+    height: 20vw;
+    width: 20vw;
+    border-radius: 50%;
+    border: 4px #c3c3c3 solid;
+    transform: translateX(-10vw);
+}
+
+.arrow-wrap .arrow-head{
+    border-right: 4px #c3c3c3 solid;
+    border-bottom: 4px #c3c3c3 solid;
+    content: '';
+    display: block;
+    position: relative;
+    transform: translate(8.1vw, 7vw) rotate(37deg);
+    bottom: 0;
+    height: 3vw;
+    width: 3vw;
+}
+
+.phone {
+    position: absolute;
+    height: var(--phone-height);
+    width: var(--phone-width);
+    background-color: var(--phone-color);
+    border: 2px #ffffff solid;
+    border-radius: 15px;
+}
+
+.phone::after {
+    content: '';
+    display: block;
+    background-color: #fff;
+    height: 2vw;
+    width: 2vw;
+    position: relative;
+    top: calc(100% - 3vw);
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+}
+
+.screen{
+    position: absolute;
+    height: calc(var(--phone-height) - 6vw);
+    width: calc(var(--phone-width) - 2vw);
+    border: 1px #c3c3c3 solid;
+    border-radius: 10px;
+    top: 1vw;
+    left:50%;
+    transform: translateX(-50%);
+}
+
+.shadow {
+    border: 2px #555555 solid;
+    transform-origin: 50% 90%;
+}
+
+.shadow .screen {
+    border: 1px #555555 solid;
+}
+
+.shadow::after {
+    background-color: #555555;
+}
+
+.rotate90 {
+    transform-origin: 60% 80%;
+    transform: rotate(90deg) translateY(4vw);
+}
+
+@keyframes up-down {
+    50% {
+        transform: translate(20vw, -15vw);
+    }
+}
+    .hide {
+        display: none
+    }

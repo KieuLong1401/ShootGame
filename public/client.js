@@ -1,10 +1,9 @@
 import Player from './classes/Player.js'
 import Game from './classes/Game.js'
 import Bullet from './classes/Bullet.js'
-import { CAMERA_BASE_WIDTH, GAME_SIZE, KILL_ANNOUNCE_TIMEOUT, MAX_PLAYER } from './const.js'
+import { CAMERA_BASE_WIDTH, DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, GAME_SIZE, JOYSTICK_SIZE, KILL_ANNOUNCE_TIMEOUT, MAX_PLAYER } from './const.js'
 
 const socket = io()
-
 
 socket.on('connect', () => {
     const menu = document.querySelector('#menu')
@@ -13,15 +12,36 @@ socket.on('connect', () => {
     const canvas = document.querySelector('#canvas')
     const announceContainer = document.querySelector('.announceContainer')
     const leaderBoardMain = document.querySelector('.main')
+    const rotateDeviceAnnounce = document.querySelector('.rotateDeviceAnnounce')
+    const loadingScreen = document.querySelector('.loading')
+    
+    loadingScreen.classList.add('hide')
 
     const myGame = new Game(canvas)
-
+    
     var frontendPlayers = {}
     var frontendBullets = []
-
+    
     var id = socket.id
 
+    if(isTouchDevice()) {
+        myGame.isMobile = true
+
+        if(window.innerWidth < window.innerHeight) {
+            rotateDeviceAnnounce.classList.remove('hide')
+        } else {
+            rotateDeviceAnnounce.classList.add('hide')
+        }
+    } else {
+        myGame.isMobile = false
+
+        rotateDeviceAnnounce.classList.add('hide')
+    }
+
+
     function addKillAnnounce(killedPlayer, beKilledPlayer) {
+        if(!frontendPlayers[id]) return
+
         let announce = document.createElement('div')
         announce.classList.add('announce')
 
@@ -67,6 +87,33 @@ socket.on('connect', () => {
                 myGame.canvas.height / 2),
         }
     }
+    function getDistance(positionA, positionB) {
+        let distanceX = positionA.x - positionB.x;
+        let distanceY = positionA.y - positionB.y;
+    
+        return Math.sqrt(distanceX ** 2 + distanceY ** 2)
+    }
+    function getDirection(angle) {
+        const degree = (angle * 180 / Math.PI + 360) % 360
+
+        if(degree >= 22.5 && degree < 67.5) {
+            return ['down', 'right']
+        } else if(degree >= 67.5 && degree < 122.5) {
+            return ['down']
+        } else if(degree >= 122.5 && degree < 157.5) {
+            return ['down', 'left']
+        } else if(degree >= 157.5 && degree < 202.5) {
+            return ['left']
+        } else if(degree >= 202.5 && degree < 247.5) {
+            return ['up', 'left']
+        } else if(degree >= 247.5 && degree < 292.5) {
+            return ['up']
+        } else if(degree >= 292.5 && degree < 337.5) {
+            return ['up', 'right']
+        } else {
+            return ['right']
+        }
+    }
 
     function animate() {
         myGame.render(frontendPlayers, frontendBullets)
@@ -86,13 +133,17 @@ socket.on('connect', () => {
             myGame.basePosition = myPlayer.position
 
             menu.classList.add('hide')
+
+            myGame.havePlayer = true
         } else {
             myGame.basePosition = {
                 x: GAME_SIZE / 2,
                 y: GAME_SIZE / 2,
             }
-
+            
             menu.classList.remove('hide')
+
+            myGame.havePlayer = false
         }
 
         frontendPlayerIds.forEach((playerId) => {
@@ -149,10 +200,13 @@ socket.on('connect', () => {
             container.insertAdjacentElement('beforeend', kill)
             
             leaderBoardMain.insertAdjacentElement('beforeend', container)
-            leaderBoardMain.style.border = '2px gray solid'
+            leaderBoardMain.style.border = '1px darkturquoise solid'
         })
     }
 
+    function isTouchDevice() {
+        return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+    }
 
     joinBtn.addEventListener('click', () => {
         const playerIds = Object.keys(frontendPlayers)
@@ -205,6 +259,12 @@ socket.on('connect', () => {
         myGame.scaleRate = scaleRate
         myGame.canvas.width = window.innerWidth
         myGame.canvas.height = window.innerHeight
+
+        if(!isTouchDevice() && window.innerWidth < window.innerHeight) {
+            rotateDeviceAnnounce.classList.remove('hide')
+        } else if(!isTouchDevice() && window.innerWidth > window.innerHeight) {
+            rotateDeviceAnnounce.classList.add('hide')
+        }
     })
 
     document.addEventListener('wheel', (event) => {
@@ -228,6 +288,132 @@ socket.on('connect', () => {
                 event.clientX - player.positionOnCamera.x
             )
         )
+    })
+
+    myGame.canvas.addEventListener('touchstart', (event) => {
+        event.preventDefault()
+
+        if(event.touches) {
+            const moveJoystickPosition = {
+                x: DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, 
+                y: myGame.canvas.height - DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER
+            }
+            const shootJoystickPosition = {
+                x: myGame.canvas.width - DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, 
+                y: myGame.canvas.height - DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER
+            }
+
+            Array.from(event.touches).forEach(touch => {
+                const touchPosition = {
+                    x: touch.pageX,
+                    y: touch.pageY
+                }
+
+                const touchDistanceFromMoveJoystick = getDistance(moveJoystickPosition, touchPosition)
+                const touchDistanceFromShootJoystick = getDistance(shootJoystickPosition, touchPosition)
+
+                if(touchDistanceFromMoveJoystick <= JOYSTICK_SIZE * 2) {
+                    let directionDegree = Math.atan2(
+                        touchPosition.y - moveJoystickPosition.y,
+                        touchPosition.x - moveJoystickPosition.x
+                    )
+
+
+                    myGame.movementJoystick = {
+                        touchId: touch.identifier,
+                        directionDegree,
+                        distance: touchDistanceFromMoveJoystick < JOYSTICK_SIZE ? touchDistanceFromMoveJoystick : JOYSTICK_SIZE
+                    }
+
+                    socket.emit('moveJoystickTrigger', getDirection(directionDegree))
+                }
+                
+                if(touchDistanceFromShootJoystick <= JOYSTICK_SIZE * 2) {
+                    myGame.shootJoystick = {
+                        touchId: touch.identifier,
+                        directionDegree: Math.atan2(
+                            touchPosition.y - shootJoystickPosition.y,
+                            touchPosition.x - shootJoystickPosition.x
+                        ),
+                        distance: touchDistanceFromShootJoystick < JOYSTICK_SIZE ? touchDistanceFromShootJoystick : JOYSTICK_SIZE
+                    }
+                    socket.emit('mousemove', myGame.shootJoystick.directionDegree)
+                    socket.emit('shootJoystickTrigger')
+                }
+            })
+        }
+    })
+    myGame.canvas.addEventListener('touchmove', (event) => {
+        event.preventDefault()
+
+        if(event.touches) {
+            const moveJoystickPosition = {
+                x: DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, 
+                y: myGame.canvas.height - DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER
+            }
+            const shootJoystickPosition = {
+                x: myGame.canvas.width - DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, 
+                y: myGame.canvas.height - DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER
+            }
+
+            Array.from(event.touches).forEach(touch => {
+                const touchPosition = {
+                    x: touch.pageX,
+                    y: touch.pageY
+                }
+                const touchDistanceFromMoveJoystick = getDistance(moveJoystickPosition, touchPosition)
+                const touchDistanceFromShootJoystick = getDistance(shootJoystickPosition, touchPosition)
+
+                let directionDegree = Math.atan2(
+                    touchPosition.y - moveJoystickPosition.y,
+                    touchPosition.x - moveJoystickPosition.x
+                )
+
+                if(touch.identifier == myGame.movementJoystick.touchId) {
+                    myGame.movementJoystick = {
+                        touchId: myGame.movementJoystick.touchId,
+                        directionDegree,
+                        distance: touchDistanceFromMoveJoystick < JOYSTICK_SIZE ? touchDistanceFromMoveJoystick : JOYSTICK_SIZE
+                    }
+                    socket.emit('moveJoystickTrigger', getDirection(directionDegree))
+
+                }
+                
+                if(touch.identifier == myGame.shootJoystick.touchId) {
+                    myGame.shootJoystick = {
+                        touchId: myGame.shootJoystick.touchId,
+                        directionDegree: Math.atan2(
+                            touchPosition.y - shootJoystickPosition.y,
+                            touchPosition.x - shootJoystickPosition.x
+                        ),
+                        distance: touchDistanceFromShootJoystick < JOYSTICK_SIZE ? touchDistanceFromShootJoystick : JOYSTICK_SIZE
+                    }
+                    socket.emit('mousemove', myGame.shootJoystick.directionDegree)
+                }
+            })
+        }
+    })
+    myGame.canvas.addEventListener('touchend', (event) => {
+        event.preventDefault()
+
+        Array.from(event.changedTouches).forEach(touch => {
+            if(touch.identifier == myGame.movementJoystick.touchId) {
+                myGame.movementJoystick = {
+                    touchId: null,
+                    directionDegree: 0,
+                    distance: 0
+                }
+                socket.emit('moveJoystickUnTrigger')
+            }
+            if(touch.identifier == myGame.shootJoystick.touchId) {
+                myGame.shootJoystick = {
+                    touchId: null,
+                    directionDegree: 0,
+                    distance: 0
+                }
+                socket.emit('shootJoystickUnTrigger')
+            }
+        })
     })
 
 

@@ -1,4 +1,4 @@
-import { GAME_SIZE, MINI_MAP_SIZE, PLAYER_SIZE } from '../const.js'
+import { PLAYER_SIZE } from '../const.js'
 
 class Player {
     constructor(player) {
@@ -21,12 +21,11 @@ class Player {
         this.renderHP(ctx)
         this.renderName(ctx)
     }
-    renderOnMap(ctx) {
-        let mapRatio = MINI_MAP_SIZE / GAME_SIZE
-        let size = this.size * mapRatio
+    renderOnMap(ctx, ratio) {
+        let size = this.size * ratio
 
         ctx.beginPath()
-        ctx.arc(ctx.canvas.width - MINI_MAP_SIZE + this.position.x * mapRatio, ctx.canvas.height - MINI_MAP_SIZE + this.position.y * mapRatio, size , 0, 2 * Math.PI)
+        ctx.arc(this.position.x * ratio, this.position.y * ratio, size , 0, 2 * Math.PI)
         ctx.fillStyle = this.color
         ctx.fill()
     }

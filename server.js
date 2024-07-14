@@ -28,6 +28,7 @@ var colors = CHAR_COLORS
 var backendPlayers = {}
 var backendBullets = []
 var directions = {}
+var shootIntervalId
 
 function getRandomColor() {
     let randomIndex = Math.floor(Math.random() * colors.length)
@@ -315,6 +316,40 @@ io.on('connection', (socket) => {
         }
 
     })
+    
+    socket.on('shootJoystickTrigger', () => {
+        shootIntervalId = setInterval(() => {
+            let shotPlayer = backendPlayers[id]
+    
+            if (!shotPlayer) return
+    
+            backendBullets.push({
+                id,
+                firstPosition: { ...shotPlayer.position },
+                position: { ...shotPlayer.position },
+                velocity: {
+                    x: Math.cos(shotPlayer.gunRotateDegree) * BULLET_SPEED,
+                    y: Math.sin(shotPlayer.gunRotateDegree) * BULLET_SPEED,
+                },
+                rotateDegree: shotPlayer.gunRotateDegree,
+                color: shotPlayer.color,
+            })
+        }, SHOOT_DELAY)
+    })
+    socket.on('shootJoystickUnTrigger', () => {
+        clearInterval(shootIntervalId)
+    })
+    socket.on('moveJoystickTrigger', (direction) => {
+        if(!directions[id]) return
+
+        directions[id] = new Set(direction)
+    })
+    socket.on('moveJoystickUnTrigger',() => {
+        if(!directions[id]) return
+
+        directions[id] = new Set()
+    })
+    
 })
 
 setInterval(() => {

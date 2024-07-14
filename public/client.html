@@ -15,11 +15,31 @@
         <script src="/socket.io/socket.io.js"></script>
     </head>
     <body>
+        <div class="loading">
+            <div class="spinner"></div>
+        </div>
+
+        <div class="rotateDeviceAnnounce">
+            <div class="phone shadow">
+                <div class="screen"></div>
+            </div>
+            <div class="phone rotate90">
+                <div class="screen"></div>
+            </div>
+            <div class="arrow-wrap">
+                <div class="arrow-circle">
+                    <div class="arrow"></div>
+                </div>
+                <div class="arrow-head"></div>
+            </div>
+        </div>
+        
         <div class="leaderBoard">
             <div class="main"></div>
         </div>
+
         <div class="announceContainer"></div>
-        <canvas id="canvas"></canvas>
+
         <div id="menu">
             <div class="background"></div>
             <div class="content">
@@ -29,6 +49,9 @@
                 <button id="joinBtn">join</button>
             </div>
         </div>
+
+        <canvas id="canvas"></canvas>
+
         <script
             src="client.js"
             type="module"
