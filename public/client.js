@@ -265,6 +265,18 @@ socket.on('connect', () => {
         } else if(!isTouchDevice() && window.innerWidth > window.innerHeight) {
             rotateDeviceAnnounce.classList.add('hide')
         }
+
+        
+    })
+    window.addEventListener('orientationchange', () => {
+        if(!isTouchDevice()) return
+        
+        if(window.innerWidth < window.innerHeight) {
+            rotateDeviceAnnounce.classList.remove('hide')
+        } else {
+            rotateDeviceAnnounce.classList.add('hide')
+        }
+
     })
 
     document.addEventListener('wheel', (event) => {
