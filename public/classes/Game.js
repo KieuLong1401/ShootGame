@@ -1,4 +1,4 @@
-import { CAMERA_BASE_WIDTH, DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, GAME_SIZE, JOYSTICK_SIZE, MINI_MAP_RATIO, POLYGONAL_TYPE, POLYGON_RADIUS } from '../const.js'
+import { DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, GAME_SIZE, JOYSTICK_SIZE, MINI_MAP_RATIO, POLYGONAL_TYPE, POLYGON_RADIUS } from '../const.js'
 
 class Game {
     constructor(canvas) {
@@ -11,7 +11,6 @@ class Game {
 
         this.canvas.width = window.innerWidth
         this.canvas.height = window.innerHeight
-        this.scaleRate = (window.innerWidth + window.innerHeight) / CAMERA_BASE_WIDTH
         this.movementJoystick = {
             touchId: null,
             directionDegree: 0,
@@ -51,7 +50,7 @@ class Game {
         
         this.ctx.closePath();
         this.ctx.strokeStyle = 'gray'
-        this.ctx.lineWidth = 10 * this.scaleRate
+        this.ctx.lineWidth = 10
         this.ctx.stroke();
     }
     renderPolygonGridBackground() {
@@ -65,10 +64,10 @@ class Game {
             y: this.basePosition.y - this.canvas.height / 2
         }
 
-        const startCol = Math.ceil(cameraPosition.x / colSpacing) - 1
+        const startCol = Math.ceil(cameraPosition.x / colSpacing) - 1 
         const startRow = Math.ceil(cameraPosition.y / rowSpacing / 2) - 1
         const endCol = Math.ceil((cameraPosition.x + this.canvas.width) / colSpacing) + 1;
-        const endRow = Math.ceil((cameraPosition.y + this.canvas.height ) / (rowSpacing * 2)) + 1;
+        const endRow = Math.ceil((cameraPosition.y + this.canvas.height) / (rowSpacing * 2)) + 1;
 
         const initialX = this.canvas.width / 2 - this.basePosition.x
         const initialY = this.canvas.height / 2 - this.basePosition.y
@@ -83,7 +82,7 @@ class Game {
                 polygonPosition.x = initialX + (colIndex * colSpacing)
                 polygonPosition.y = initialY + (rowIndex * rowSpacing * 2) - (Math.abs(colIndex % 2) * rowSpacing)
                 
-                this.drawPolygon(polygonPosition, polygonAngle)
+                this.drawPolygon(polygonPosition, polygonAngle) 
             }
         }
     }
@@ -153,17 +152,12 @@ class Game {
     render(players, bullets) {
         this.clearScreen()
         this.renderBackgroundColor()
-        
-        this.ctx.save()
-        this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2)
-        this.ctx.scale(this.scaleRate, this.scaleRate)
+
 
         this.renderPolygonGridBackground()
         this.renderPlayers(players)
         this.renderBullets(bullets)
         this.renderGameBorder()
-
-        this.ctx.restore()
 
         if(this.isMobile && this.havePlayer) {
             this.renderMovementJoystick()

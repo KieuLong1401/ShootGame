@@ -1,7 +1,7 @@
 import Player from './classes/Player.js'
 import Game from './classes/Game.js'
 import Bullet from './classes/Bullet.js'
-import { CAMERA_BASE_WIDTH, DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, GAME_SIZE, JOYSTICK_SIZE, KILL_ANNOUNCE_TIMEOUT, MAX_PLAYER } from './const.js'
+import { DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, GAME_SIZE, JOYSTICK_SIZE, KILL_ANNOUNCE_TIMEOUT, MAX_PLAYER } from './const.js'
 
 const socket = io()
 
@@ -405,9 +405,6 @@ socket.on('connect', () => {
     window.addEventListener('resize', () => {
         myGame.canvas.width = window.innerWidth
         myGame.canvas.height = window.innerHeight
-        
-        let scaleRate = (window.innerWidth + window.innerHeight) / CAMERA_BASE_WIDTH
-        myGame.scaleRate = scaleRate
     })
     window.onresize = () => {
         if(!isTouchDevice()) return

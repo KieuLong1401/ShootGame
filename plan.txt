@@ -5,6 +5,8 @@ Features:
     - Play online.
     - Player based camera.
     - Mini map.
+    - Kill leader board.
+    - Kill announce.
     - Tank:
         + Movement.
         + Shoot.
@@ -13,9 +15,10 @@ Features:
         + Limit bullet range.
         + Delay shot.
         + Get random color.
-    - Set user name.
+        + Heal.
     - Hexagon grid background.
     - Map limit.
+    - Mobile version.
 
 Process:
     - 3/7:
@@ -25,22 +28,18 @@ Process:
     - 4/7:
         + Tank's movement.
     - 5/7:
-        + Set up constant file.
+        + Constant.
         + Draw and rotate tank's gun.
         + Tank's shoot.
     - 6/7 -> 7/7:
-        + Update tank's shoot.
         + Character based camera.
         + Disable user's window scale behave. (Can cause some bug).
     - 8/7:
         + Update tank's shoot.
         + Bullet collision.
-        + Set up for server's upload.
-        + Restructure, clean code.
     - 9/7:
         + Hexagon grid background.
     - 10/7: 
-        + Optimize background.
         + Delay shoot.
         + Limit bullet range.
     - 11/7:
@@ -54,3 +53,6 @@ Process:
         + Rotate device announce for mobile.
     - 13/7 - 14/4:
         + joystick for mobile player.
+    - 15/7: 
+        + Exit button.
+        + Full screen request.
