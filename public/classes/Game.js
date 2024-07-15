@@ -42,8 +42,8 @@ class Game {
             let angleSin = Math.sin(polygonAngle * pointIndex)
             
             let pointPosition = {
-                x: position.x + POLYGON_RADIUS * angleCos,
-                y: position.y + POLYGON_RADIUS * angleSin
+                x: (position.x + POLYGON_RADIUS * this.scaleRate * angleCos),
+                y: (position.y + POLYGON_RADIUS * this.scaleRate * angleSin)
             }
             
             this.ctx.lineTo(pointPosition.x, pointPosition.y);
@@ -51,14 +51,14 @@ class Game {
         
         this.ctx.closePath();
         this.ctx.strokeStyle = 'gray'
-        this.ctx.lineWidth = 10
+        this.ctx.lineWidth = 10 * this.scaleRate
         this.ctx.stroke();
     }
     renderPolygonGridBackground() {
         const polygonAngle = 2 * Math.PI / POLYGONAL_TYPE;
 
-        const rowSpacing = (POLYGON_RADIUS * Math.sin(polygonAngle));
-        const colSpacing = POLYGON_RADIUS * (1 + Math.cos(polygonAngle));
+        const rowSpacing = (POLYGON_RADIUS * Math.sin(polygonAngle)) * this.scaleRate;
+        const colSpacing = POLYGON_RADIUS * (1 + Math.cos(polygonAngle)) * this.scaleRate;
 
         const cameraPosition = {
             x: this.basePosition.x - this.canvas.width / 2,
@@ -70,8 +70,8 @@ class Game {
         const endCol = Math.ceil((cameraPosition.x + this.canvas.width) / colSpacing) + 1;
         const endRow = Math.ceil((cameraPosition.y + this.canvas.height ) / (rowSpacing * 2)) + 1;
 
-        const initialX = this.canvas.width / 2 - this.basePosition.x
-        const initialY = this.canvas.height / 2 - this.basePosition.y
+        const initialX = this.canvas.width / 2 - (this.basePosition.x) * this.scaleRate
+        const initialY = this.canvas.height / 2 - (this.basePosition.y) * this.scaleRate
 
         let polygonPosition = {
             x: initialX,
@@ -91,10 +91,10 @@ class Game {
     renderPlayers(players) {
         Object.keys(players).forEach((id) => {
             const player = players[id]
-            player.render(this.ctx)
+            player.render(this.ctx, this.scaleRate)
         })
     }
-    renderBullets(bullets) {
+    renderBullets(bullets, scale) {
         bullets.forEach((bullet) => {
             bullet.render(this.ctx)
         })
@@ -102,12 +102,12 @@ class Game {
 
     renderGameBorder() {
         this.ctx.strokeStyle = 'darkturquoise'
-        this.ctx.lineWidth = 10
+        this.ctx.lineWidth = 10 * this.scaleRate
         this.ctx.strokeRect(
-            this.canvas.width / 2 - this.basePosition.x,
-            this.canvas.height / 2 - this.basePosition.y,
-            GAME_SIZE,
-            GAME_SIZE
+            this.canvas.width / 2 - (this.basePosition.x) * this.scaleRate,
+            this.canvas.height / 2 - (this.basePosition.y) * this.scaleRate,
+            GAME_SIZE * this.scaleRate,
+            GAME_SIZE * this.scaleRate
         )
     }
     renderMap(players) {
@@ -130,7 +130,7 @@ class Game {
     renderMovementJoystick() {
         this.ctx.beginPath()
         this.ctx.arc(DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, this.canvas.height - DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, JOYSTICK_SIZE , 0, 2 * Math.PI)
-        this.ctx.fillStyle = 'white'
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
         this.ctx.fill()
 
         this.ctx.beginPath()
@@ -141,7 +141,7 @@ class Game {
     renderShootJoystick() {
         this.ctx.beginPath()
         this.ctx.arc(this.canvas.width - DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, this.canvas.height - DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, JOYSTICK_SIZE , 0, 2 * Math.PI)
-        this.ctx.fillStyle = 'white'
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
         this.ctx.fill()
 
         this.ctx.beginPath()

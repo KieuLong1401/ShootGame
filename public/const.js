@@ -1,6 +1,6 @@
 export const GAME_SIZE = 5000
 export const MINI_MAP_RATIO = 0.3
-export const CAMERA_BASE_WIDTH = 3000
+export const CAMERA_BASE_WIDTH = 2500
 export const CHAR_COLORS = [
     '#39FF14',
     '#FF6EC7',
@@ -29,5 +29,5 @@ export const KILL_ANNOUNCE_TIMEOUT = 3000
 export const POLYGON_RADIUS = 100
 export const POLYGONAL_TYPE = 6
 
-export const JOYSTICK_SIZE = 40
-export const DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER = 75
+export const JOYSTICK_SIZE = 50
+export const DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER = 80

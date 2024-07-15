@@ -216,15 +216,22 @@ function deletePlayer(playerId) {
 
     delete backendPlayers[playerId]
     delete directions[playerId]
+
     for (let bulletIndex = backendBullets.length - 1; bulletIndex >= 0; bulletIndex--) {
         let bullet = backendBullets[bulletIndex]
-        if (bullet.playerId == playerId) {
+        if (bullet.id == playerId) {
             deleteBullet(bulletIndex)
         }
     }
 }
 function deleteBullet(bulletIndex) {
     backendBullets.splice(bulletIndex, 1)
+}
+
+function disconnectHandler(id) {
+    if (!backendPlayers[id]) return
+
+    deletePlayer(id)
 }
 
 app.use(express.static(__dirname + '/public'))
@@ -248,11 +255,9 @@ io.on('connection', (socket) => {
         }
         directions[id] = new Set()
     })
-    socket.on('disconnect', () => {
-        if (!backendPlayers[id]) return
+    socket.on('disconnect', () => disconnectHandler(id))
+    socket.on('exit', () => disconnectHandler(id))
 
-        deletePlayer(id)
-    })
     socket.on('keydown', (keycode) => {
         if (!directions[id]) return
         switch (keycode) {
@@ -318,6 +323,7 @@ io.on('connection', (socket) => {
     })
     
     socket.on('shootJoystickTrigger', () => {
+        clearInterval(shootIntervalId)
         shootIntervalId = setInterval(() => {
             let shotPlayer = backendPlayers[id]
     
