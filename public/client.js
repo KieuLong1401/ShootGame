@@ -24,8 +24,6 @@ socket.on('connect', () => {
     var id = socket.id
 
 //set up
-    console.log((myGame.canvas.width + myGame.canvas.height) / CAMERA_BASE_WIDTH)
-
     loadingScreen.classList.add('hide')
 
     if(isTouchDevice()) {
@@ -405,9 +403,11 @@ socket.on('connect', () => {
         socket.emit('shoot', player.gunRotateDegree)
     })
     window.addEventListener('resize', () => {
-        myGame.scaleRate = (window.innerWidth + window.innerHeight) / CAMERA_BASE_WIDTH
         myGame.canvas.width = window.innerWidth
         myGame.canvas.height = window.innerHeight
+        
+        let scaleRate = (window.innerWidth + window.innerHeight) / CAMERA_BASE_WIDTH
+        myGame.scaleRate = scaleRate
     })
     window.onresize = () => {
         if(!isTouchDevice()) return

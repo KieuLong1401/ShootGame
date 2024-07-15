@@ -17,7 +17,7 @@ Features:
     - Hexagon grid background.
     - Map limit.
 
-Schedule:
+Process:
     - 3/7:
         + Initial set up.
         + Socket.io set up.

@@ -7,17 +7,17 @@ class Bullet {
         this.color = bullet.color
     }
 
-    render(ctx, scale) {
+    render(ctx) {
         ctx.save()
         ctx.translate(this.position.x, this.position.y)
         ctx.rotate(this.rotateDegree)
 
         ctx.fillStyle = this.color
         ctx.fillRect(
-            -BULLET_WIDTH * scale / 2 + 60 * scale,
-            -BULLET_HEIGHT * scale / 2,
-            BULLET_WIDTH * scale,
-            BULLET_HEIGHT * scale
+            -BULLET_WIDTH / 2 + 60,
+            -BULLET_HEIGHT / 2,
+            BULLET_WIDTH,
+            BULLET_HEIGHT
         )
 
         ctx.restore()
