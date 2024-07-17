@@ -28,7 +28,6 @@ var colors = CHAR_COLORS
 var backendPlayers = {}
 var backendBullets = []
 var directions = {}
-var shootIntervalId
 
 function getRandomColor() {
     let randomIndex = Math.floor(Math.random() * colors.length)
@@ -241,6 +240,8 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
     const id = socket.id
+    var shootIntervalId
+
 
     socket.on('addPlayer', (name) => {
         backendPlayers[id] = {
@@ -299,30 +300,28 @@ io.on('connection', (socket) => {
         if (!backendPlayers[id]) return
         backendPlayers[id].gunRotateDegree = gunRotateDegree
     })
-    socket.on('shoot', (gunRotateDegree) => {
+    socket.on('shoot', () => {
         let shotPlayer = backendPlayers[id]
         let currentTime = new Date().getTime()
-
+        
         if (!shotPlayer) return
-
+        
         if(currentTime - shotPlayer.lastShotTime >= SHOOT_DELAY) {
             backendBullets.push({
                 id,
                 firstPosition: { ...shotPlayer.position },
                 position: { ...shotPlayer.position },
                 velocity: {
-                    x: Math.cos(gunRotateDegree) * BULLET_SPEED,
-                    y: Math.sin(gunRotateDegree) * BULLET_SPEED,
+                    x: Math.cos(shotPlayer.gunRotateDegree) * BULLET_SPEED,
+                    y: Math.sin(shotPlayer.gunRotateDegree) * BULLET_SPEED,
                 },
-                rotateDegree: gunRotateDegree,
+                rotateDegree: shotPlayer.gunRotateDegree,
                 color: shotPlayer.color,
             })
             shotPlayer.lastShotTime = currentTime
         }
 
-    })
-    
-    socket.on('shootJoystickTrigger', () => {
+
         clearInterval(shootIntervalId)
         shootIntervalId = setInterval(() => {
             let shotPlayer = backendPlayers[id]
@@ -342,7 +341,7 @@ io.on('connection', (socket) => {
             })
         }, SHOOT_DELAY)
     })
-    socket.on('shootJoystickUnTrigger', () => {
+    socket.on('unShoot', () => {
         clearInterval(shootIntervalId)
     })
     socket.on('moveJoystickTrigger', (direction) => {

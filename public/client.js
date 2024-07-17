@@ -147,6 +147,7 @@ socket.on('connect', () => {
             }
             
             menu.classList.remove('hide')
+            exitBtn.classList.add('hide')
 
             myGame.havePlayer = false
         }
@@ -290,7 +291,7 @@ socket.on('connect', () => {
                         }
                         
                         socket.emit('mousemove',shootDirectionDegree)
-                        socket.emit('shootJoystickTrigger')
+                        socket.emit('shoot')
                     }
                 }
             })
@@ -314,7 +315,7 @@ socket.on('connect', () => {
                     directionDegree: 0,
                     distance: 0
                 }
-                socket.emit('shootJoystickUnTrigger')
+                socket.emit('unShoot')
             }
         })
     }
@@ -395,13 +396,6 @@ socket.on('connect', () => {
     window.addEventListener('blur', () => {
         socket.emit('windowBlur')
     })
-    window.addEventListener('click', () => {
-        let player = frontendPlayers[id]
-
-        if (!player) return
-
-        socket.emit('shoot', player.gunRotateDegree)
-    })
     window.addEventListener('resize', () => {
         myGame.canvas.width = window.innerWidth
         myGame.canvas.height = window.innerHeight
@@ -431,6 +425,17 @@ socket.on('connect', () => {
     document.addEventListener('mozfullscreenchange', exitHandler, false);
     document.addEventListener('MSFullscreenChange', exitHandler, false);
     document.addEventListener('webkitfullscreenchange', exitHandler, false);
+    document.addEventListener('mousedown', (event) => {
+        if(event.which == 1) {
+            socket.emit('shoot')
+        }
+    })
+    document.addEventListener('mouseup', (event) => {
+        if(event.which == 1) {
+            socket.emit('unShoot')
+        }
+    })
+
 
     myGame.canvas.addEventListener('mousemove', (event) => {
         let player = frontendPlayers[id]
