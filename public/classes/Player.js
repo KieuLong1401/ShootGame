@@ -51,7 +51,7 @@ class Player {
         const hpBarHeight = 10 * scale
         const spaceFromBodyToHpBar = 60 * scale
 
-        ctx.fillStyle = 'gray'
+        ctx.fillStyle = this.color
         ctx.fillRect(this.positionOnCamera.x - hpBarWidth / 2, this.positionOnCamera.y - spaceFromBodyToHpBar, this.hp * scale, hpBarHeight)
         ctx.strokeStyle = 'white'
         ctx.lineWidth = 1 * scale

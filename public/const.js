@@ -10,19 +10,19 @@ export const CHAR_COLORS = [
     '#E4080A'
 ]
 export const MAX_PLAYER = 6
-export const PLAYER_SPEED = 15
+export const PLAYER_SPEED = 13
 export const PLAYER_SIZE = 40
 export const PLAYER_HP = 100
 
-export const SHOOT_DELAY = 350
+export const SHOOT_DELAY = 500
 export const BULLET_DAMAGE = 20
-export const BULLET_SPEED = 20
+export const BULLET_SPEED = 40
 export const BULLET_WIDTH = 20
 export const BULLET_HEIGHT = 10
-export const BULLET_RANGE_LIMIT = 1000
+export const BULLET_RANGE_LIMIT = 1500
 
 export const HEAL_AFTER_GET_HIT = 7000
-export const HEAL_AMOUNT = 0.3
+export const HEAL_AMOUNT = 0.1
 
 export const KILL_ANNOUNCE_TIMEOUT = 3000
 
