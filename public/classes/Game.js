@@ -1,4 +1,4 @@
-import { DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, GAME_SIZE, JOYSTICK_SIZE, MINI_MAP_RATIO, POLYGONAL_TYPE, POLYGON_RADIUS } from '../const.js'
+import { CAMERA_WIDTH, DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, GAME_SIZE, JOYSTICK_SIZE, MINI_MAP_RATIO, POLYGONAL_TYPE, POLYGON_RADIUS } from '../const.js'
 
 class Game {
     constructor(canvas) {
@@ -23,6 +23,7 @@ class Game {
         }
         this.isMobile = false
         this.havePlayer = false
+        this.scale = window.innerWidth / CAMERA_WIDTH
     }
 
     clearScreen() {
@@ -41,8 +42,8 @@ class Game {
             let angleSin = Math.sin(polygonAngle * pointIndex)
             
             let pointPosition = {
-                x: (position.x + POLYGON_RADIUS * angleCos),
-                y: (position.y + POLYGON_RADIUS * angleSin)
+                x: (position.x + POLYGON_RADIUS * this.scale * angleCos),
+                y: (position.y + POLYGON_RADIUS * this.scale * angleSin)
             }
             
             this.ctx.lineTo(pointPosition.x, pointPosition.y);
@@ -50,27 +51,27 @@ class Game {
         
         this.ctx.closePath();
         this.ctx.strokeStyle = 'gray'
-        this.ctx.lineWidth = 10
+        this.ctx.lineWidth = 10 * this.scale
         this.ctx.stroke();
     }
     renderPolygonGridBackground() {
         const polygonAngle = 2 * Math.PI / POLYGONAL_TYPE;
 
-        const rowSpacing = (POLYGON_RADIUS * Math.sin(polygonAngle));
-        const colSpacing = POLYGON_RADIUS * (1 + Math.cos(polygonAngle));
+        const rowSpacing = POLYGON_RADIUS * this.scale * Math.sin(polygonAngle);
+        const colSpacing = POLYGON_RADIUS * this.scale * (1 + Math.cos(polygonAngle));
 
         const cameraPosition = {
-            x: this.basePosition.x - this.canvas.width / 2,
-            y: this.basePosition.y - this.canvas.height / 2
+            x: this.basePosition.x - this.canvas.width / this.scale / 2,
+            y: this.basePosition.y - this.canvas.height / this.scale / 2
         }
 
-        const startCol = Math.ceil(cameraPosition.x / colSpacing) - 1 
-        const startRow = Math.ceil(cameraPosition.y / rowSpacing / 2) - 1
-        const endCol = Math.ceil((cameraPosition.x + this.canvas.width) / colSpacing) + 1;
-        const endRow = Math.ceil((cameraPosition.y + this.canvas.height) / (rowSpacing * 2)) + 1;
+        const startCol = Math.ceil(cameraPosition.x / (colSpacing / this.scale)) - 1 
+        const startRow = Math.ceil(cameraPosition.y / (rowSpacing / this.scale) / 2) - 1
+        const endCol = Math.ceil((cameraPosition.x + this.canvas.width / this.scale) / (colSpacing / this.scale)) + 1;
+        const endRow = Math.ceil((cameraPosition.y + this.canvas.height / this.scale) / ((rowSpacing / this.scale) * 2)) + 1;
 
-        const initialX = this.canvas.width / 2 - this.basePosition.x
-        const initialY = this.canvas.height / 2 - this.basePosition.y
+        const initialX = (0 - this.basePosition.x) * this.scale + this.canvas.width / 2
+        const initialY = (0 - this.basePosition.y) * this.scale + this.canvas.height / 2
 
         let polygonPosition = {
             x: initialX,
@@ -90,23 +91,23 @@ class Game {
     renderPlayers(players) {
         Object.keys(players).forEach((id) => {
             const player = players[id]
-            player.render(this.ctx)
+            player.render(this.ctx, this.scale)
         })
     }
     renderBullets(bullets) {
         bullets.forEach((bullet) => {
-            bullet.render(this.ctx)
+            bullet.render(this.ctx, this.scale)
         })
     }
 
     renderGameBorder() {
         this.ctx.strokeStyle = 'darkturquoise'
-        this.ctx.lineWidth = 10
+        this.ctx.lineWidth = 10 * this.scale
         this.ctx.strokeRect(
-            this.canvas.width / 2 - this.basePosition.x,
-            this.canvas.height / 2 - this.basePosition.y,
-            GAME_SIZE,
-            GAME_SIZE
+            (0 - this.basePosition.x) * this.scale + this.canvas.width / 2,
+            (0 - this.basePosition.y) * this.scale + this.canvas.height / 2,
+            GAME_SIZE * this.scale,
+            GAME_SIZE * this.scale
         )
     }
     renderMap(players) {
@@ -152,7 +153,6 @@ class Game {
     render(players, bullets) {
         this.clearScreen()
         this.renderBackgroundColor()
-
 
         this.renderPolygonGridBackground()
         this.renderPlayers(players)

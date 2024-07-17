@@ -1,7 +1,7 @@
 import Player from './classes/Player.js'
 import Game from './classes/Game.js'
 import Bullet from './classes/Bullet.js'
-import { DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, GAME_SIZE, JOYSTICK_SIZE, KILL_ANNOUNCE_TIMEOUT, MAX_PLAYER } from './const.js'
+import { CAMERA_WIDTH, DISTANCE_FROM_JOYSTICK_TO_DEVICE_BORDER, GAME_SIZE, JOYSTICK_SIZE, KILL_ANNOUNCE_TIMEOUT, MAX_PLAYER } from './const.js'
 
 const socket = io()
 
@@ -79,14 +79,24 @@ socket.on('connect', () => {
         return div.firstChild
     }
     function getPositionInCamera(position) {
+        // return {
+        //     x:
+        //         (position.x -
+        //         myGame.basePosition.x +
+        //         myGame.canvas.width / 2),
+        //     y:
+        //         (position.y -
+        //         myGame.basePosition.y +
+        //         myGame.canvas.height / 2),
+        // }
         return {
             x:
-                (position.x -
-                myGame.basePosition.x +
+                ((position.x -
+                myGame.basePosition.x) * myGame.scale +
                 myGame.canvas.width / 2),
             y:
-                (position.y -
-                myGame.basePosition.y +
+                ((position.y -
+                myGame.basePosition.y) * myGame.scale +
                 myGame.canvas.height / 2),
         }
     }
@@ -399,6 +409,8 @@ socket.on('connect', () => {
     window.addEventListener('resize', () => {
         myGame.canvas.width = window.innerWidth
         myGame.canvas.height = window.innerHeight
+
+        myGame.scale = window.innerWidth / CAMERA_WIDTH
     })
     window.onresize = () => {
         if(!isTouchDevice()) return

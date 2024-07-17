@@ -1,5 +1,6 @@
 export const GAME_SIZE = 5000
 export const MINI_MAP_RATIO = 0.3
+export const CAMERA_WIDTH = 2000
 export const CHAR_COLORS = [
     '#39FF14',
     '#FF6EC7',

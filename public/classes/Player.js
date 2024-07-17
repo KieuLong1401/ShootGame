@@ -15,11 +15,11 @@ class Player {
         this.hp = player.hp
     }
 
-    render(ctx) {
-        this.renderBody(ctx)
-        this.renderGun(ctx)
-        this.renderHP(ctx)
-        this.renderName(ctx)
+    render(ctx, scale) {
+        this.renderBody(ctx, scale)
+        this.renderGun(ctx, scale)
+        this.renderHP(ctx, scale)
+        this.renderName(ctx, scale)
     }
     renderOnMap(ctx, ratio) {
         let size = this.size * ratio
@@ -29,34 +29,38 @@ class Player {
         ctx.fillStyle = this.color
         ctx.fill()
     }
-    renderBody(ctx) {
+    renderBody(ctx, scale) {
         ctx.beginPath()
-        ctx.arc(this.positionOnCamera.x, this.positionOnCamera.y, this.size , 0, 2 * Math.PI)
+        ctx.arc(this.positionOnCamera.x, this.positionOnCamera.y, this.size * scale, 0, 2 * Math.PI)
         ctx.fillStyle = this.color
         ctx.fill()
     }
-    renderGun(ctx) {
-        const gunWidth = 30
-        const gunHeight = 20
+    renderGun(ctx, scale) {
+        const gunWidth = 30 * scale
+        const gunHeight = 20 * scale
 
 
         ctx.setTransform(1, 0, 0, 1, this.positionOnCamera.x, this.positionOnCamera.y)
         ctx.rotate(this.gunRotateDegree)
 
-        ctx.fillRect(this.size -5, -gunHeight / 2, gunWidth, gunHeight)
+        ctx.fillRect(this.size * scale - 5 * scale, -gunHeight / 2, gunWidth, gunHeight)
         ctx.setTransform(1, 0, 0, 1, 0, 0)
     }
-    renderHP(ctx) {
+    renderHP(ctx, scale) {
+        const hpBarWidth = 100 * scale
+        const hpBarHeight = 10 * scale
+        const spaceFromBodyToHpBar = 60 * scale
+
         ctx.fillStyle = 'gray'
-        ctx.fillRect(this.positionOnCamera.x - 100 / 2, this.positionOnCamera.y - 60, this.hp, 10)
+        ctx.fillRect(this.positionOnCamera.x - hpBarWidth / 2, this.positionOnCamera.y - spaceFromBodyToHpBar, this.hp * scale, hpBarHeight)
         ctx.strokeStyle = 'white'
-        ctx.lineWidth = 1
-        ctx.strokeRect(this.positionOnCamera.x - 100 / 2, this.positionOnCamera.y - 60, 100, 10)
+        ctx.lineWidth = 1 * scale
+        ctx.strokeRect(this.positionOnCamera.x - hpBarWidth / 2, this.positionOnCamera.y - spaceFromBodyToHpBar, hpBarWidth, hpBarHeight)
         
     }
-    renderName(ctx) {
-        const fontSize = 20 
-        const spaceFromBodyToName = 15 
+    renderName(ctx, scale) {
+        const fontSize = 20 * scale
+        const spaceFromBodyToName = 15 * scale
 
         ctx.font = `900 ${fontSize}px Arial`
 
@@ -65,17 +69,17 @@ class Player {
 
         ctx.fillStyle = 'white'
         ctx.strokeStyle = 'black'
-        ctx.lineWidth = 4
+        ctx.lineWidth = 4 * scale
 
         ctx.strokeText(
             this.name,
             this.positionOnCamera.x,
-            this.positionOnCamera.y + this.size + spaceFromBodyToName
+            this.positionOnCamera.y + this.size * scale + spaceFromBodyToName
         )
         ctx.fillText(
             this.name,
             this.positionOnCamera.x,
-            this.positionOnCamera.y + this.size + spaceFromBodyToName
+            this.positionOnCamera.y + this.size * scale + spaceFromBodyToName
         )
     }
 }
