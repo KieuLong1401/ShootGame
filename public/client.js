@@ -405,6 +405,7 @@ socket.on('connect', () => {
     })
     window.addEventListener('blur', () => {
         socket.emit('windowBlur')
+        window.location.reload()
     })
     window.addEventListener('resize', () => {
         myGame.canvas.width = window.innerWidth

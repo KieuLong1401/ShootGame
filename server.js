@@ -211,6 +211,8 @@ function updateBullet() {
 }
 
 function deletePlayer(playerId) {
+    if(!backendPlayers[playerId]) return
+
     colors.push(backendPlayers[playerId].color)
 
     delete backendPlayers[playerId]
