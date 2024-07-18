@@ -248,7 +248,7 @@ io.on('connection', (socket) => {
     socket.on('addPlayer', (name) => {
         backendPlayers[id] = {
             position: getRandomPosition(),
-            color: getRandomColor(),
+            color: "darkturquoise",
             kill: 0,
             hp: PLAYER_HP,
             name,
